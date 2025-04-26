@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { View, Image, StyleSheet, ActivityIndicator, Alert, Text } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import { Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { WallhavenWallpaperResponse, WallhavenWallpaperResponseData } from '@/types/wallhaven';
 import { Share, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { formatFileSize } from '@/utils/formatFileSize';
+import { useQuery } from '@tanstack/react-query';
 
 
 const DetailItem = ({ label, value }: { label: string; value?: string | number }) => (
@@ -18,31 +18,23 @@ const DetailItem = ({ label, value }: { label: string; value?: string | number }
   </View>
 );
 
-
 const ImageDetails = () => {
   const { id } = useLocalSearchParams();
-  const [loading, setLoading] = useState(true);
-  const [imageDetails, setImageDetails] = useState<WallhavenWallpaperResponseData>();
   const navigation = useNavigation();
 
+
+  const { data: imageDetailsData, isLoading: loading } = useQuery(
+    {
+      queryKey: ['imageDetails', id],
+      queryFn: () => fetch(`https://wallhaven.cc/api/v1/w/${id}`).then(res => res.json()),
+    }
+  );
+
+  const imageDetails = imageDetailsData?.data;
+
   useEffect(() => {
-    fetchImage();
     navigation.setOptions({ title: 'Image Details' });
   }, [id]);
-
-  const fetchImage = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`https://wallhaven.cc/api/v1/w/${id}`);
-      const json = await response.json() as WallhavenWallpaperResponse;
-      const data = json.data
-      setImageDetails(data);
-      setLoading(false);
-    } catch (error) {
-      console.error(error);
-      setLoading(false);
-    }
-  };
 
 
   const shareImage = async () => {
