@@ -73,7 +73,13 @@ const App = () => {
         numColumns={numColumns}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={() => loading && <ActivityIndicator size="large" />}
+        ListFooterComponent={() =>
+          loading ? (
+            <View style={styles.footerLoader}>
+              <ActivityIndicator size="large" color="#888" />
+            </View>
+          ) : null
+        }
       />
     </View>
   );
@@ -95,6 +101,11 @@ const styles = StyleSheet.create({
   },
   itemInvisible: {
     backgroundColor: 'transparent',
+  },
+  footerLoader: {
+    paddingVertical: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
