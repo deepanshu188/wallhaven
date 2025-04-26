@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -8,40 +7,43 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import ImageItem from '../components/ImageItem';
+import { useInfiniteQuery } from '@tanstack/react-query';
 
 const numColumns = 3;
 
 const App = () => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
   const router = useRouter();
 
-  useEffect(() => {
-    loadData();
-  }, [page]);
-
-  const loadData = () => {
-    setLoading(true);
-    fetch(`https://wallhaven.cc/api/v1/search?q=id&page=${page}`)
-      .then(response => response.json())
-      .then(json => {
-        setData([...data, ...json.data]);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error(error);
-        setLoading(false);
-      });
+  const fetchPage = async (pageParam: number) => {
+    const response = await fetch(`https://wallhaven.cc/api/v1/search?q=id&page=${pageParam}`);
+    return await response.json();
   };
+
+  const { fetchNextPage, data: images, isLoading: loading } = useInfiniteQuery({
+    queryKey: ['images'],
+    queryFn: ({ pageParam }: { pageParam: number }) => fetchPage(pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.meta.current_page < lastPage.meta.last_page) {
+        return lastPage.meta.current_page + 1;
+      }
+      return undefined;
+    },
+  })
 
   const handleLoadMore = () => {
-    setPage(page + 1);
+    fetchNextPage();
   };
 
+  const data = images?.pages?.flatMap((item) => item.data)
+
+  console.log(images?.pages?.flatMap((item) => item.data), 'images');
+  console.log(data, 'data')
+
   // Function to format the data into rows of `numColumns`
-  const formatData = (data, numColumns) => {
-    const numberOfFullRows = Math.floor(data.length / numColumns);
+  const formatData = (data: any[] | undefined, numColumns: number) => {
+    if (!data) return [];
+    const numberOfFullRows = Math.floor(data?.length / numColumns);
     let numberOfElementsLastRow = data.length - (numberOfFullRows * numColumns);
 
     // Add empty elements to the end of the data array to fill the last row
@@ -49,7 +51,6 @@ const App = () => {
       data.push({ key: `blank-${numberOfElementsLastRow}`, empty: true });
       numberOfElementsLastRow++;
     }
-
     return data;
   };
 
@@ -73,13 +74,7 @@ const App = () => {
         numColumns={numColumns}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={() =>
-          loading ? (
-            <View style={styles.footerLoader}>
-              <ActivityIndicator size="large" color="#888" />
-            </View>
-          ) : null
-        }
+        ListFooterComponent={() => loading && <ActivityIndicator size="large" />}
       />
     </View>
   );
@@ -89,23 +84,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 5, // Add some padding around the FlatList
+    padding: 5,
   },
   item: {
     flex: 1,
     margin: 3,
-    height: 120, // Adjust as needed
+    height: 120,
     borderRadius: 10,
     overflow: 'hidden', // Clip the image within the rounded border
     backgroundColor: '#eee', // Add a background color for a cleaner look
   },
   itemInvisible: {
     backgroundColor: 'transparent',
-  },
-  footerLoader: {
-    paddingVertical: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
 

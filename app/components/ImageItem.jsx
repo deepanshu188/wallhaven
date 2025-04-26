@@ -1,34 +1,46 @@
 import React, { useState } from 'react';
-import { View, ActivityIndicator, Image } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
+import LinearGradient from 'expo-linear-gradient';
+import { createShimmerPlaceholder } from 'react-native-shimmer-placeholder';
+
+const ShimmerPlaceHolder = createShimmerPlaceholder(LinearGradient);
 
 const ImageItem = ({ item }) => {
   const [imageLoading, setImageLoading] = useState(true);
 
   return (
-    <View>
-      {imageLoading && (
-        <ActivityIndicator
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: 'rgba(0,0,0,0.5)',
-          }}
-          size="large"
-          color="#fff"
+    <View style={styles.container}>
+      <ShimmerPlaceHolder
+        visible={!imageLoading}
+        style={styles.shimmer}
+        shimmerStyle={styles.shimmer}
+      >
+        <Image
+          source={{ uri: item.path }}
+          style={styles.image}
+          onLoad={() => setImageLoading(false)}
+          resizeMode="cover"
         />
-      )}
-      <Image
-        source={{ uri: item.path }}
-        style={{ height: 200, width: '100%' }}
-        onLoad={() => setImageLoading(false)}
-      />
+      </ShimmerPlaceHolder>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    height: 200,
+  },
+  shimmer: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+  },
+  image: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+  },
+});
 
 export default ImageItem;

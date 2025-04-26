@@ -136,6 +136,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '80%',
     position: 'relative',
+    paddingTop: 20,
   },
   iconContainer: {
     position: 'absolute',
