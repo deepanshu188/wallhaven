@@ -34,13 +34,13 @@ const ImageDetails = () => {
 
   const downloadImage = async () => {
     try {
-      let { status } = await MediaLibrary.requestPermissionsAsync();
+      const { status } = await MediaLibrary.requestPermissionsAsync(true);
       if (status !== 'granted') {
         Alert.alert('Permission needed', 'Please allow access to your photo library to download images.');
         return;
       }
-
-      const fileUri = FileSystem.documentDirectory + `${id}.jpg`;
+      const fileExtension = !!imageDetails?.file_type && imageDetails?.file_type.split('/')[1];
+      const fileUri = FileSystem.documentDirectory + `${id}.${fileExtension}`;
       if (!imageDetails?.path) return;
       const { uri } = await FileSystem.downloadAsync(imageDetails?.path, fileUri);
 
