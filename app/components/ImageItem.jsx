@@ -1,27 +1,14 @@
-import React, { useState } from 'react';
-import { View, Image, StyleSheet } from 'react-native';
-import LinearGradient from 'expo-linear-gradient';
-import { createShimmerPlaceholder } from 'react-native-shimmer-placeholder';
-
-const ShimmerPlaceHolder = createShimmerPlaceholder(LinearGradient);
+import { View, StyleSheet } from 'react-native';
+import { Image } from 'expo-image';
 
 const ImageItem = ({ item }) => {
-  const [imageLoading, setImageLoading] = useState(true);
-
   return (
     <View style={styles.container}>
-      <ShimmerPlaceHolder
-        visible={!imageLoading}
-        style={styles.shimmer}
-        shimmerStyle={styles.shimmer}
-      >
-        <Image
-          source={{ uri: item.path }}
-          style={styles.image}
-          onLoad={() => setImageLoading(false)}
-          resizeMode="cover"
-        />
-      </ShimmerPlaceHolder>
+      <Image
+        source={{ uri: item.path }}
+        style={styles.image}
+        transition={1000}
+      />
     </View>
   );
 };
@@ -37,10 +24,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   image: {
+    flex: 1,
     width: '100%',
-    height: 200,
-    borderRadius: 8,
+    backgroundColor: '#0553',
   },
+
 });
 
 export default ImageItem;
