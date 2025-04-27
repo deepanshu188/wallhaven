@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import ImageGrid from '../components/ImageGrid';
 
 const SearchScreen = () => {
   return (
     <View style={styles.container}>
-      <Text>Search Screen</Text>
+      <ImageGrid numColumns={3} />
     </View>
   );
 };
@@ -12,8 +13,8 @@ const SearchScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 5,
   },
 });
 
