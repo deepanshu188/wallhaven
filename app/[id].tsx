@@ -1,15 +1,16 @@
-import React, { useEffect } from 'react';
-import { View, Image, StyleSheet, ActivityIndicator, Alert, Text } from 'react-native';
+import React, { useContext, useEffect } from 'react';
+import { StyleSheet, View, ActivityIndicator, Alert, Text, Platform, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
-import { Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Share, TouchableOpacity } from 'react-native';
+import { Share } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { formatFileSize } from '@/utils/formatFileSize';
 import { useQuery } from '@tanstack/react-query';
-
+import { Image } from 'expo-image';
+import { ThemedView } from '../app/components/ThemedView';
+import { ThemeContext } from './contexts/ThemeContexts';
 
 const DetailItem = ({ label, value }: { label: string; value?: string | number }) => (
   <View style={styles.detailItem}>
@@ -22,7 +23,6 @@ const ImageDetails = () => {
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
 
-
   const { data: imageDetailsData, isLoading: loading } = useQuery(
     {
       queryKey: ['imageDetails', id],
@@ -31,11 +31,18 @@ const ImageDetails = () => {
   );
 
   const imageDetails = imageDetailsData?.data;
+  const { theme } = useContext(ThemeContext);
 
   useEffect(() => {
-    navigation.setOptions({ title: 'Image Details' });
-  }, [id]);
+    navigation.setOptions({
+      title: 'Image Details',
+      headerStyle: {
+        backgroundColor: theme.background,
+      },
+      headerTintColor: theme.text,
+    });
 
+  }, [id]);
 
   const shareImage = async () => {
     try {
@@ -71,8 +78,6 @@ const ImageDetails = () => {
         await MediaLibrary.saveToLibraryAsync(uri);
         Alert.alert('Image saved', 'Image has been saved to your photo library.');
       }
-
-
     } catch (error) {
       console.error('Download error:', error);
       Alert.alert('Download failed', 'There was an error downloading the image.');
@@ -81,17 +86,17 @@ const ImageDetails = () => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <ThemedView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
-      </View>
+      </ThemedView>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       <View style={styles.imageWrapper}>
-        <Image source={{ uri: imageDetails?.path }} style={styles.fullScreenImage} />
-        <View style={styles.iconContainer}>
+        <Image source={imageDetails?.path} style={styles.fullScreenImage} />
+        <View style={styles.overlayContainer}>
           <TouchableOpacity onPress={downloadImage} style={styles.iconButton}>
             <Feather name="download" size={24} color="white" />
           </TouchableOpacity>
@@ -100,21 +105,21 @@ const ImageDetails = () => {
           </TouchableOpacity>
         </View>
       </View>
-      <View style={styles.detailsContainer}>
+      <ThemedView style={styles.detailsContainer}>
         <DetailItem label="File Size" value={formatFileSize(imageDetails?.file_size)} />
         <DetailItem label="File Type" value={imageDetails?.file_type} />
-        <DetailItem label="Views" value={imageDetails?.views} />
+        <DetailItem label="ThemedViews" value={imageDetails?.views} />
         <DetailItem label="Date" value={imageDetails?.created_at} />
         <DetailItem label="Resolution" value={imageDetails?.resolution} />
-      </View>
-    </View>
+      </ThemedView>
+    </ThemedView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: '#000',
   },
@@ -128,27 +133,26 @@ const styles = StyleSheet.create({
     height: '80%',
     resizeMode: 'contain',
   },
-  text: {
-    color: '#fff',
-    marginBottom: 5,
-  },
   imageWrapper: {
     width: '100%',
     height: '80%',
     position: 'relative',
-    paddingTop: 20,
   },
-  iconContainer: {
+  overlayContainer: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    bottom: 20, // Place the icons at the bottom of the image
+    left: 0,
+    right: 0, // This ensures the icons are centered horizontally within the image container
+    alignItems: 'center', // Center the icons horizontally
     flexDirection: 'row',
-    gap: 10,
+    gap: 15,
+    paddingHorizontal: 10,
+    zIndex: 1, // Ensure the icons are above the image
   },
   iconButton: {
-    padding: 8,
+    padding: 12,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 20,
+    borderRadius: 25,
   },
   detailsContainer: {
     width: '90%',
@@ -170,7 +174,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '400',
   },
-
 });
 
 export default ImageDetails;

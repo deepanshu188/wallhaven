@@ -10,14 +10,14 @@
 		"newArchEnabled": true,
 		"ios": {
 			"supportsTablet": true,
-			"bundleIdentifier": "com.anonymous.wallhaven"
+			"bundleIdentifier": "com.wallhaven"
 		},
 		"android": {
 			"adaptiveIcon": {
 				"foregroundImage": "./assets/images/adaptive-icon.png",
 				"backgroundColor": "#ffffff"
 			},
-			"package": "com.anonymous.wallhaven"
+			"package": "com.wallhaven"
 		},
 		"web": {
 			"bundler": "metro",

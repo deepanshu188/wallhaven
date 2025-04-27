@@ -1,9 +1,10 @@
 import React from 'react';
-import { FlatList, View, StyleSheet, ActivityIndicator, Pressable } from 'react-native';
+import { FlatList, StyleSheet, ActivityIndicator, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import ImageItem from './ImageItem';
 import { api } from '@/axiosConfig';
+import { ThemedView } from '../components/ThemedView';
 
 interface ImageGridProps {
   numColumns: number;
@@ -71,37 +72,39 @@ const ImageGrid = ({ numColumns = 3, queryObject = {} }: ImageGridProps) => {
 
   if (isLoading) {
     return (
-      <View style={[styles.center, { flex: 1 }]}>
+      <ThemedView style={[styles.center, { flex: 1 }]}>
         <ActivityIndicator size="large" />
-      </View>
+      </ThemedView>
     );
   }
 
   return (
-    <FlatList
-      data={formatData(data)}
-      keyExtractor={(item) => item.id || item.key}
-      renderItem={({ item }) => {
-        if (item.empty === true) {
-          return <View style={[styles.item, styles.itemInvisible]} />;
+    <ThemedView style={{ flex: 1 }}>
+      <FlatList
+        data={formatData(data)}
+        keyExtractor={(item) => item.id || item.key}
+        renderItem={({ item }) => {
+          if (item.empty === true) {
+            return <ThemedView style={[styles.item, styles.itemInvisible]} />;
+          }
+          return (
+            <ThemedView style={styles.item}>
+              <Pressable onPress={() => router.push(`/${item.id}`)}>
+                <ImageItem item={item} />
+              </Pressable>
+            </ThemedView>
+          );
+        }}
+        numColumns={numColumns}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.3}
+        ListFooterComponent={() =>
+          isFetchingNextPage ? (
+            <ActivityIndicator size="large" style={{ marginVertical: 20 }} />
+          ) : null
         }
-        return (
-          <View style={styles.item}>
-            <Pressable onPress={() => router.push(`/${item.id}`)}>
-              <ImageItem item={item} />
-            </Pressable>
-          </View>
-        );
-      }}
-      numColumns={numColumns}
-      onEndReached={handleLoadMore}
-      onEndReachedThreshold={0.3}
-      ListFooterComponent={() =>
-        isFetchingNextPage ? (
-          <ActivityIndicator size="large" style={{ marginVertical: 20 }} />
-        ) : null
-      }
-    />
+      />
+    </ThemedView>
   );
 };
 
@@ -112,7 +115,6 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 10,
     overflow: 'hidden',
-    backgroundColor: '#eee',
   },
   itemInvisible: {
     backgroundColor: 'transparent',

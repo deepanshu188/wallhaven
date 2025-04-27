@@ -1,8 +1,7 @@
 import axios from "axios";
-import { BASE_URL } from "./content/constants";
 
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: 'https://wallhaven.cc/api/v1',
 });
 
 // const setBearerToken = (token: string) => {

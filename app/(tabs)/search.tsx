@@ -1,19 +1,19 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import ImageGrid from '../components/ImageGrid';
+import { ThemedView } from '../components/ThemedView';
 
 const SearchScreen = () => {
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       <ImageGrid numColumns={3} />
-    </View>
+    </ThemedView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     padding: 5,
   },
 });
