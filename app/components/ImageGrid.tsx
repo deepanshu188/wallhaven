@@ -1,22 +1,30 @@
-import React from 'react';
-import { FlatList, StyleSheet, ActivityIndicator, Pressable } from 'react-native';
+import { StyleSheet, ActivityIndicator, Pressable, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import ImageItem from './ImageItem';
 import { api } from '@/axiosConfig';
-import { ThemedView } from '../components/ThemedView';
+import ThemedView from '../components/ThemedView';
+import { LegendList } from '@legendapp/list';
+import { useFilters } from '@/store/filters';
+import FiltersModal from './FiltersModal';
 
 interface ImageGridProps {
   numColumns: number;
-  queryObject?: any;
 }
 
-const ImageGrid = ({ numColumns = 3, queryObject = {} }: ImageGridProps) => {
+const ImageGrid = ({ numColumns = 3 }: ImageGridProps) => {
+  const queryClient = useQueryClient();
   const router = useRouter();
+
+  const { filters } = useFilters();
+  const GET_IMAGES_QUERY_KEY = ['images', filters.q];
 
   const fetchPage = async (page: number) => {
     try {
-      const query = { ...queryObject, page };
+      const nonEmptyFilters = Object.fromEntries(
+        Object.entries(filters).map(([key, value]) => [key, value]).filter(([_, value]) => value !== '')
+      );
+      const query = { ...nonEmptyFilters, page };
       const queryString = new URLSearchParams(query).toString();
       const url = '/search' + `?${queryString}`;
       console.log(url);
@@ -33,10 +41,11 @@ const ImageGrid = ({ numColumns = 3, queryObject = {} }: ImageGridProps) => {
     data: images,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage,
     isLoading,
+    isFetchingNextPage,
+    refetch
   } = useInfiniteQuery({
-    queryKey: ['images', queryObject],
+    queryKey: GET_IMAGES_QUERY_KEY,
     queryFn: ({ pageParam = 1 }) => fetchPage(pageParam),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
@@ -48,26 +57,16 @@ const ImageGrid = ({ numColumns = 3, queryObject = {} }: ImageGridProps) => {
   });
 
   const handleLoadMore = () => {
-    if (hasNextPage) {
+    if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   };
 
   const data = images?.pages?.flatMap((item) => item.data);
 
-  const formatData = (data) => {
-    if (!data) return [];
-    const numberOfFullRows = Math.floor(data.length / numColumns);
-    let numberOfElementsLastRow = data.length - numberOfFullRows * numColumns;
-
-    while (
-      numberOfElementsLastRow !== numColumns &&
-      numberOfElementsLastRow !== 0
-    ) {
-      data.push({ key: `blank-${numberOfElementsLastRow}`, empty: true });
-      numberOfElementsLastRow++;
-    }
-    return data;
+  const clearAndRefetch = () => {
+    queryClient.resetQueries({ queryKey: GET_IMAGES_QUERY_KEY, exact: true })
+    refetch();
   };
 
   if (isLoading) {
@@ -80,13 +79,11 @@ const ImageGrid = ({ numColumns = 3, queryObject = {} }: ImageGridProps) => {
 
   return (
     <ThemedView style={{ flex: 1 }}>
-      <FlatList
-        data={formatData(data)}
-        keyExtractor={(item) => item.id || item.key}
+      <LegendList
+        data={data ?? []}
+        keyExtractor={(item, index) => item.id + index}
         renderItem={({ item }) => {
-          if (item.empty === true) {
-            return <ThemedView style={[styles.item, styles.itemInvisible]} />;
-          }
+          if (!item) return <ThemedView style={[styles.item, styles.itemInvisible]} />
           return (
             <ThemedView style={styles.item}>
               <Pressable onPress={() => router.push(`/${item.id}`)}>
@@ -97,13 +94,16 @@ const ImageGrid = ({ numColumns = 3, queryObject = {} }: ImageGridProps) => {
         }}
         numColumns={numColumns}
         onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.3}
-        ListFooterComponent={() =>
-          isFetchingNextPage ? (
-            <ActivityIndicator size="large" style={{ marginVertical: 20 }} />
-          ) : null
+        refreshControl={
+          <RefreshControl refreshing={isLoading} onRefresh={clearAndRefetch} />
+        }
+        ListFooterComponent={
+          <ThemedView>
+            <ActivityIndicator size="large" />
+          </ThemedView>
         }
       />
+      <FiltersModal clearAndRefetch={clearAndRefetch} />
     </ThemedView>
   );
 };

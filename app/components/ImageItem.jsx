@@ -1,12 +1,12 @@
 import { StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
-import { ThemedView } from './ThemedView';
+import ThemedView from './ThemedView';
 
 const ImageItem = ({ item }) => {
   return (
     <ThemedView style={styles.container}>
       <Image
-        source={{ uri: item.path }}
+        source={item.thumbs.large}
         style={styles.image}
         transition={1000}
       />

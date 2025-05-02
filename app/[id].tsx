@@ -1,5 +1,5 @@
-import React, { useContext, useEffect } from 'react';
-import { StyleSheet, View, ActivityIndicator, Alert, Text, Platform, TouchableOpacity } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { StyleSheet, View, ActivityIndicator, Alert, Platform, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
@@ -9,29 +9,51 @@ import { Feather } from '@expo/vector-icons';
 import { formatFileSize } from '@/utils/formatFileSize';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
-import { ThemedView } from '../app/components/ThemedView';
-import { ThemeContext } from './contexts/ThemeContexts';
+import ThemedView from '../app/components/ThemedView';
+import Theme from './contexts/ThemeContexts';
+import ThemedText from './components/ThemedText';
+import { api } from '@/axiosConfig';
+import { AutoSkeletonView } from 'react-native-auto-skeleton';
 
 const DetailItem = ({ label, value }: { label: string; value?: string | number }) => (
-  <View style={styles.detailItem}>
-    <Text style={styles.detailLabel}>{label}</Text>
-    <Text style={styles.detailValue}>{value}</Text>
-  </View>
+  <ThemedView style={styles.detailItem}>
+    <ThemedText style={styles.detailLabel}>{label}</ThemedText>
+    <ThemedText style={styles.detailValue}>{value}</ThemedText>
+  </ThemedView>
 );
 
 const ImageDetails = () => {
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  const fetchImageDetails = async () => {
+    const response = await api.get(`https://wallhaven.cc/api/v1/w/${id}`);
+    return response.data;
+  };
 
   const { data: imageDetailsData, isLoading: loading } = useQuery(
     {
       queryKey: ['imageDetails', id],
-      queryFn: () => fetch(`https://wallhaven.cc/api/v1/w/${id}`).then(res => res.json()),
+      queryFn: fetchImageDetails,
     }
   );
 
   const imageDetails = imageDetailsData?.data;
-  const { theme } = useContext(ThemeContext);
+  const { theme } = useContext(Theme.ThemeContext);
+
+  const [imageHeight, setImageHeight] = useState(300);
+
+  useEffect(() => {
+    if (imageDetails?.resolution) {
+      const [width, height] = imageDetails.resolution.split('x').map(Number);
+      const aspectRatio = width / height;
+
+      const screenWidth = Dimensions.get('window').width;
+      const calculatedHeight = screenWidth / aspectRatio;
+      setImageHeight(calculatedHeight);
+    }
+  }, [imageDetails?.resolution]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -93,26 +115,41 @@ const ImageDetails = () => {
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.imageWrapper}>
-        <Image source={imageDetails?.path} style={styles.fullScreenImage} />
-        <View style={styles.overlayContainer}>
-          <TouchableOpacity onPress={downloadImage} style={styles.iconButton}>
-            <Feather name="download" size={24} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={shareImage} style={styles.iconButton}>
-            <Feather name="share-2" size={24} color="white" />
-          </TouchableOpacity>
-        </View>
+    <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
+      <View style={[styles.imageWrapper, { width: '100%' }]}>
+        <AutoSkeletonView
+          isLoading={!imageLoaded}
+          shimmerBackgroundColor="#333"
+          animationType='pulse'
+          gradientColors={['#333', '#999']}
+          shimmerSpeed={1}
+        >
+          <Image
+            source={imageDetails?.path}
+            style={[
+              styles.fullScreenImage,
+              { height: imageHeight },
+            ]}
+            onLoad={() => setImageLoaded(true)}
+          />
+        </AutoSkeletonView>
+        <ThemedView style={[styles.detailsContainer, { marginTop: 20 }]}>
+          <ThemedView style={styles.buttonsContainer}>
+            <TouchableOpacity onPress={downloadImage} style={styles.iconButton}>
+              <Feather name="download" size={24} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={shareImage} style={styles.iconButton}>
+              <Feather name="share-2" size={24} color="white" />
+            </TouchableOpacity>
+          </ThemedView>
+          <DetailItem label="Size" value={formatFileSize(imageDetails?.file_size)} />
+          <DetailItem label="Type" value={imageDetails?.file_type} />
+          <DetailItem label="Views" value={imageDetails?.views.toLocaleString()} />
+          <DetailItem label="Date" value={imageDetails?.created_at} />
+          <DetailItem label="Resolution" value={imageDetails?.resolution} />
+        </ThemedView>
       </View>
-      <ThemedView style={styles.detailsContainer}>
-        <DetailItem label="File Size" value={formatFileSize(imageDetails?.file_size)} />
-        <DetailItem label="File Type" value={imageDetails?.file_type} />
-        <DetailItem label="ThemedViews" value={imageDetails?.views} />
-        <DetailItem label="Date" value={imageDetails?.created_at} />
-        <DetailItem label="Resolution" value={imageDetails?.resolution} />
-      </ThemedView>
-    </ThemedView>
+    </ScrollView>
   );
 };
 
@@ -121,7 +158,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    backgroundColor: '#000',
   },
   loadingContainer: {
     flex: 1,
@@ -130,36 +166,30 @@ const styles = StyleSheet.create({
   },
   fullScreenImage: {
     width: '100%',
-    height: '80%',
-    resizeMode: 'contain',
   },
   imageWrapper: {
+    height: '100%',
     width: '100%',
-    height: '80%',
     position: 'relative',
   },
-  overlayContainer: {
-    position: 'absolute',
-    bottom: 20, // Place the icons at the bottom of the image
-    left: 0,
-    right: 0, // This ensures the icons are centered horizontally within the image container
-    alignItems: 'center', // Center the icons horizontally
+  buttonsContainer: {
+    flex: 1,
+    marginBottom: 20,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
     flexDirection: 'row',
-    gap: 15,
-    paddingHorizontal: 10,
-    zIndex: 1, // Ensure the icons are above the image
+    columnGap: 10,
   },
   iconButton: {
-    padding: 12,
+    padding: 6,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     borderRadius: 25,
   },
   detailsContainer: {
-    width: '90%',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    width: '96%',
     borderRadius: 10,
     padding: 15,
-    marginTop: 10,
+    margin: 'auto',
   },
   detailItem: {
     flexDirection: 'row',
@@ -167,11 +197,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   detailLabel: {
-    color: '#aaa',
     fontWeight: '600',
   },
   detailValue: {
-    color: '#fff',
     fontWeight: '400',
   },
 });

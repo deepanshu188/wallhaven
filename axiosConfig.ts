@@ -1,20 +1,18 @@
+import * as SecureStore from 'expo-secure-store';
 import axios from "axios";
 
 const api = axios.create({
   baseURL: 'https://wallhaven.cc/api/v1',
 });
 
-// const setBearerToken = (token: string) => {
-//   api.defaults.headers['Authorization'] = `Bearer ${token}`;
-// };
-//
-// const removeBearerToken = () => {
-//   delete api.defaults.headers['Authorization'];
-// };
+const removeBearerToken = () => {
+  delete api.defaults.headers['X-API-Key'];
+};
 
-// const token = localStorage.getItem('token');
-// if (token) {
-//   setBearerToken(token);
-// }
 
-export { api };
+(async () => {
+  let key = await SecureStore.getItemAsync("apiKey");
+  api.defaults.headers["X-API-Key"] = key;
+})();
+
+export { api, removeBearerToken };
