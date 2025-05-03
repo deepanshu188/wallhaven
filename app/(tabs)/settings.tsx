@@ -3,10 +3,10 @@ import { StyleSheet, TextInput } from "react-native";
 import ThemedView from "../components/ThemedView";
 import Theme from '../contexts/ThemeContexts';
 import ThemedText from "../components/ThemedText";
-import * as SecureStore from 'expo-secure-store';
 import RadioGroup from "../components/RadioGroup";
 import Button from "../components/Button";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { apiKeyStorage } from "@/utils/mmkv";
 
 const SettingsScreen = () => {
   const context = useContext(Theme.ThemeContext);
@@ -22,23 +22,20 @@ const SettingsScreen = () => {
   };
 
   useEffect(() => {
-    const loadApiKey = async () => {
-      try {
-        let key = await SecureStore.getItemAsync("apiKey");
-        setApiKey(key);
-        setIsKeySaved(key !== null);
-      } catch (error) {
-        console.log("Error loading API key from AsyncStorage:", error);
-      }
-    };
-
-    loadApiKey();
+    try {
+      const key = apiKeyStorage.getString('apiKey')
+      if (!key) return;
+      setApiKey(key);
+      setIsKeySaved(key !== null);
+    } catch (error) {
+      console.log("Error loading API key from AsyncStorage:", error);
+    }
   }, []);
 
-  const saveApiKey = async () => {
+  const saveApiKey = () => {
     try {
       if (!apiKey) return;
-      await SecureStore.setItemAsync("apiKey", apiKey);
+      apiKeyStorage.set('apiKey', apiKey)
       setApiKey(apiKey);
       setIsKeySaved(true);
     } catch (error) {
@@ -46,9 +43,9 @@ const SettingsScreen = () => {
     }
   };
 
-  const clearApiKey = async () => {
+  const clearApiKey = () => {
     try {
-      await SecureStore.deleteItemAsync("apiKey")
+      apiKeyStorage.delete('apiKey')
       setApiKey(null);
       setIsKeySaved(false);
     } catch (error) {

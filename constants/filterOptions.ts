@@ -1,5 +1,5 @@
-import * as SecureStore from 'expo-secure-store';
-const hasApiKey = SecureStore.getItem('apiKey');
+import { apiKeyStorage } from "@/utils/mmkv";
+const key = apiKeyStorage.getString('apiKey')
 
 const order = [
   { label: 'Desc', value: 'desc' },
@@ -10,7 +10,7 @@ const sorting = ['Random', 'Views', 'Favorites', 'Toplist']
 
 const purity = [
   { label: 'SFW', value: '100' },
-  { label: 'All', value: '111', disabled: hasApiKey ? false : true },
+  { label: 'All', value: '111', disabled: key ? false : true },
   { label: 'Sketchy', value: '010' }, { label: 'SFW + Sketchy', value: '110' }
 ];
 
