@@ -1,4 +1,4 @@
-import { StyleSheet, ActivityIndicator, Pressable, RefreshControl } from 'react-native';
+import { StyleSheet, Pressable, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import ImageItem from './ImageItem';
@@ -7,7 +7,7 @@ import ThemedView from '../components/ThemedView';
 import { LegendList } from '@legendapp/list';
 import { useFilters } from '@/store/filters';
 import FiltersModal from './FiltersModal';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import Loader from './Loader';
 
 interface ImageGridProps {
   numColumns: number;
@@ -16,7 +16,6 @@ interface ImageGridProps {
 const ImageGrid = ({ numColumns = 3 }: ImageGridProps) => {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const primaryColor = useThemeColor({}, 'primaryColor')
 
   const { filters } = useFilters();
   const GET_IMAGES_QUERY_KEY = ['images', filters.q];
@@ -74,7 +73,7 @@ const ImageGrid = ({ numColumns = 3 }: ImageGridProps) => {
   if (isLoading) {
     return (
       <ThemedView style={[styles.center, { flex: 1 }]}>
-        <ActivityIndicator size="large" />
+        <Loader />
       </ThemedView>
     );
   }
@@ -101,7 +100,7 @@ const ImageGrid = ({ numColumns = 3 }: ImageGridProps) => {
         }
         ListFooterComponent={
           <ThemedView>
-            <ActivityIndicator size="large" color={primaryColor} />
+            <Loader />
           </ThemedView>
         }
       />

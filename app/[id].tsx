@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { StyleSheet, View, ActivityIndicator, Alert, Platform, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { StyleSheet, View, Alert, Platform, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
@@ -14,6 +14,7 @@ import Theme from './contexts/ThemeContexts';
 import ThemedText from './components/ThemedText';
 import { api } from '@/axiosConfig';
 import { AutoSkeletonView } from 'react-native-auto-skeleton';
+import Loader from '@/app/components/Loader';
 
 const DetailItem = ({ label, value }: { label: string; value?: string | number }) => (
   <ThemedView style={styles.detailItem}>
@@ -109,7 +110,7 @@ const ImageDetails = () => {
   if (loading) {
     return (
       <ThemedView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <Loader />
       </ThemedView>
     );
   }
@@ -131,8 +132,7 @@ const ImageDetails = () => {
         <AutoSkeletonView
           isLoading={!imageLoaded}
           shimmerBackgroundColor="#333"
-          animationType='gradient'
-          gradientColors={['#333', '#999']}
+          animationType='pulse'
           shimmerSpeed={1}
         >
           <Image
