@@ -2,7 +2,11 @@
 
 A simple app to get images from [Wallhaven](https://wallhaven.cc/).
 
-![Wallhaven](https://user-images.githubusercontent.com/10214025/169847630-c1f1a5f8-f0b4-4f5d-a0e8-d0f4a6c9d4c6.png)
+# Screenshots
+![homescreen](https://raw.githubusercontent.com/deepanshu188/wallhaven/refs/heads/main/assets/images/screens/wallhaven_homescreen.jpg)
+![image details](https://raw.githubusercontent.com/deepanshu188/wallhaven/refs/heads/main/assets/images/screens/wallhaven_image_details.jpg)
+![filters](https://raw.githubusercontent.com/deepanshu188/wallhaven/refs/heads/main/assets/images/screens/wallhaven_filters.jpg)
+![settings](https://raw.githubusercontent.com/deepanshu188/wallhaven/refs/heads/main/assets/images/screens/wallhaven_settings.jpg)
 
 ## Features
 
