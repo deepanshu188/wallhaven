@@ -7,6 +7,7 @@ import ThemedView from '../components/ThemedView';
 import { LegendList } from '@legendapp/list';
 import { useFilters } from '@/store/filters';
 import FiltersModal from './FiltersModal';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 interface ImageGridProps {
   numColumns: number;
@@ -15,6 +16,7 @@ interface ImageGridProps {
 const ImageGrid = ({ numColumns = 3 }: ImageGridProps) => {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const primaryColor = useThemeColor({}, 'primaryColor')
 
   const { filters } = useFilters();
   const GET_IMAGES_QUERY_KEY = ['images', filters.q];
@@ -99,7 +101,7 @@ const ImageGrid = ({ numColumns = 3 }: ImageGridProps) => {
         }
         ListFooterComponent={
           <ThemedView>
-            <ActivityIndicator size="large" />
+            <ActivityIndicator size="large" color={primaryColor} />
           </ThemedView>
         }
       />

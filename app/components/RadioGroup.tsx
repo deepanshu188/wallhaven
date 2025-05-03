@@ -1,6 +1,7 @@
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import ThemedView from './ThemedView';
 import ThemedText from './ThemedText';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 interface RadioGroupProps {
   options?: { label: string, value: string, disabled?: boolean }[];
@@ -9,6 +10,8 @@ interface RadioGroupProps {
 }
 
 const RadioGroup = ({ options = [], callBack, selectedOption }: RadioGroupProps) => {
+  const primaryColor = useThemeColor({}, 'primaryColor')
+  const secondaryColor = useThemeColor({}, 'secondaryColor')
   return (
     <ThemedView style={styles.container}>
       {options.map(({ label, value, disabled }) => (
@@ -18,8 +21,8 @@ const RadioGroup = ({ options = [], callBack, selectedOption }: RadioGroupProps)
           disabled={disabled}
           onPress={() => callBack?.(value)}
         >
-          <ThemedView style={[{ borderColor: disabled ? 'grey' : '#007AFF' }, styles.outerCircle]}>
-            {selectedOption === value && <ThemedView style={styles.innerCircle} />}
+          <ThemedView style={[{ borderColor: disabled ? 'grey' : primaryColor }, styles.outerCircle]}>
+            {selectedOption === value && <ThemedView style={[styles.innerCircle, { backgroundColor: secondaryColor }]} />}
           </ThemedView>
           <ThemedText style={styles.label} numberOfLines={1} ellipsizeMode='tail' >{label}</ThemedText>
         </TouchableOpacity>
@@ -54,7 +57,6 @@ const styles = StyleSheet.create({
     height: 10,
     width: 10,
     borderRadius: 5,
-    backgroundColor: '#007AFF',
   },
   label: {
     fontSize: 16,

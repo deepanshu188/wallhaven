@@ -1,11 +1,13 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 const FAB = ({ onPress }: { onPress: () => void }) => {
+  const primaryColor = useThemeColor({}, 'primaryColor')
   return (
     <View style={[styles.container]}>
-      <TouchableOpacity style={styles.fab} onPress={onPress}>
+      <TouchableOpacity style={[styles.fab, { backgroundColor: primaryColor }]} onPress={onPress}>
         <Feather name='filter' size={24} color="white" />
       </TouchableOpacity>
     </View>
@@ -20,7 +22,6 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   fab: {
-    backgroundColor: '#8B0EFC',
     width: 56,
     height: 56,
     borderRadius: 28,

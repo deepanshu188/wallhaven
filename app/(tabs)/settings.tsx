@@ -6,10 +6,13 @@ import ThemedText from "../components/ThemedText";
 import * as SecureStore from 'expo-secure-store';
 import RadioGroup from "../components/RadioGroup";
 import Button from "../components/Button";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 const SettingsScreen = () => {
   const context = useContext(Theme.ThemeContext);
   const isDarkMode = context.isDarkMode;
+
+  const primaryColor = useThemeColor({}, 'primaryColor')
 
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [isKeySaved, setIsKeySaved] = useState(false);
@@ -81,7 +84,7 @@ const SettingsScreen = () => {
               }
             }}
           />
-          <Button onPress={saveApiKey} title="Save Api Key" buttonStyle={{ backgroundColor: '#6200ee' }} disabled={!apiKey} />
+          <Button onPress={saveApiKey} title="Save Api Key" buttonStyle={{ backgroundColor: primaryColor }} disabled={!apiKey} />
         </>
       )}
       {isKeySaved && (

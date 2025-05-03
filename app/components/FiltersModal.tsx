@@ -9,12 +9,14 @@ import filterOptions from "@/constants/filterOptions";
 import { useContext, useState } from "react";
 import Theme from "../contexts/ThemeContexts";
 import FAB from "./Fab";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 const FiltersModal = ({ clearAndRefetch }: { clearAndRefetch: () => void }) => {
   const { ThemeContext } = Theme;
   const context = useContext(ThemeContext);
   const isDarkMode = context.isDarkMode;
   const [selectedTab, setSelectedTab] = useState('Sorting');
+  const primaryColor = useThemeColor({}, 'primaryColor')
 
   const { filters, resetFilters, setFilter } = useFilters();
 
@@ -52,7 +54,7 @@ const FiltersModal = ({ clearAndRefetch }: { clearAndRefetch: () => void }) => {
                     <TouchableOpacity key={tab} onPress={() => setSelectedTab(tab)}>
                       <ThemedText style={{
                         fontWeight: selectedTab === tab ? 'bold' : 'normal',
-                        color: selectedTab === tab ? '#6200ee' : (isDarkMode ? '#aaa' : '#555')
+                        color: selectedTab === tab ? primaryColor : (isDarkMode ? '#aaa' : '#555')
                       }}>
                         {tab}
                       </ThemedText>
@@ -95,8 +97,8 @@ const FiltersModal = ({ clearAndRefetch }: { clearAndRefetch: () => void }) => {
                 </ThemedView>
 
                 <ThemedView style={{ marginTop: 20 }}>
-                  <Button title="Apply" onPress={handleApplyFilters} buttonStyle={{ backgroundColor: '#6200ee' }} />
-                  <Button title="Clear" onPress={clearFilter} buttonStyle={{ marginTop: 10, backgroundColor: '#2a2e3600' }} textStyle={{ color: '#6200ee' }} />
+                  <Button title="Apply" onPress={handleApplyFilters} buttonStyle={{ backgroundColor: primaryColor }} />
+                  <Button title="Clear" onPress={clearFilter} buttonStyle={{ marginTop: 10, backgroundColor: '#2a2e3600' }} textStyle={{ color: primaryColor }} />
                 </ThemedView>
               </ThemedView>
             </ThemedView>

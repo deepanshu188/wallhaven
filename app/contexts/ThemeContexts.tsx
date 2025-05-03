@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { storage } from '@/utils/mmkv';
+import { Colors } from '@/constants/Colors';
 
 interface ThemeContextProps {
   theme: {
@@ -77,7 +78,7 @@ const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     background: isDarkMode ? '#000' : '#fff',
     text: isDarkMode ? '#fff' : '#000',
     tabIconInactive: isDarkMode ? '#fff' : '#000',
-    tabIconActive: '#8B0EFC',
+    tabIconActive: isDarkMode ? Colors.dark.secondaryColor : Colors.light.secondaryColor,
   };
 
   const toggleTheme = () => {
