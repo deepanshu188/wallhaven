@@ -114,13 +114,24 @@ const ImageDetails = () => {
     );
   }
 
+  const formatDate = (date: string) => {
+    if (!date) return '';
+    const dateObj = new Date(date);
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    };
+    return dateObj.toLocaleDateString('en-US', options);
+  }
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
       <View style={[styles.imageWrapper, { width: '100%' }]}>
         <AutoSkeletonView
           isLoading={!imageLoaded}
           shimmerBackgroundColor="#333"
-          animationType='pulse'
+          animationType='gradient'
           gradientColors={['#333', '#999']}
           shimmerSpeed={1}
         >
@@ -145,7 +156,7 @@ const ImageDetails = () => {
           <DetailItem label="Size" value={formatFileSize(imageDetails?.file_size)} />
           <DetailItem label="Type" value={imageDetails?.file_type} />
           <DetailItem label="Views" value={imageDetails?.views.toLocaleString()} />
-          <DetailItem label="Date" value={imageDetails?.created_at} />
+          <DetailItem label="Date" value={formatDate(imageDetails?.created_at)} />
           <DetailItem label="Resolution" value={imageDetails?.resolution} />
         </ThemedView>
       </View>
