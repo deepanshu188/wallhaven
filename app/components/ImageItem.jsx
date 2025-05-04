@@ -20,11 +20,9 @@ const styles = StyleSheet.create({
     height: 200,
   },
   image: {
-    flex: 1,
     width: '100%',
-    backgroundColor: '#0553',
+    height: '100%',
   },
-
 });
 
 export default ImageItem;

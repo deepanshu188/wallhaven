@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { StyleSheet, View, Alert, Platform, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { StyleSheet, View, Alert, Platform, TouchableOpacity, ScrollView, Dimensions, Modal } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
@@ -15,6 +15,8 @@ import ThemedText from './components/ThemedText';
 import { api } from '@/axiosConfig';
 import { AutoSkeletonView } from 'react-native-auto-skeleton';
 import Loader from '@/app/components/Loader';
+import { Zoomable } from '@likashefqet/react-native-image-zoom';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const DetailItem = ({ label, value }: { label: string; value?: string | number }) => (
   <ThemedView style={styles.detailItem}>
@@ -27,6 +29,7 @@ const ImageDetails = () => {
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [showZoom, setShowZoom] = useState(false);
 
   const fetchImageDetails = async () => {
     const response = await api.get(`https://wallhaven.cc/api/v1/w/${id}`);
@@ -46,15 +49,13 @@ const ImageDetails = () => {
   const [imageHeight, setImageHeight] = useState(300);
 
   useEffect(() => {
-    if (imageDetails?.resolution) {
-      const [width, height] = imageDetails.resolution.split('x').map(Number);
-      const aspectRatio = width / height;
-
+    if (imageDetails) {
+      const aspectRatio = imageDetails.dimension_x / imageDetails.dimension_y;
       const screenWidth = Dimensions.get('window').width;
       const calculatedHeight = screenWidth / aspectRatio;
       setImageHeight(calculatedHeight);
     }
-  }, [imageDetails?.resolution]);
+  }, [imageDetails]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -127,40 +128,51 @@ const ImageDetails = () => {
   }
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
-      <View style={[styles.imageWrapper, { width: '100%' }]}>
-        <AutoSkeletonView
-          isLoading={!imageLoaded}
-          shimmerBackgroundColor="#333"
-          animationType='pulse'
-          shimmerSpeed={1}
-        >
-          <Image
-            source={imageDetails?.path}
-            style={[
-              styles.fullScreenImage,
-              { height: imageHeight },
-            ]}
-            onLoad={() => setImageLoaded(true)}
-          />
-        </AutoSkeletonView>
-        <ThemedView style={[styles.detailsContainer, { marginTop: 20 }]}>
-          <ThemedView style={styles.buttonsContainer}>
-            <TouchableOpacity onPress={downloadImage} style={styles.iconButton}>
-              <Feather name="download" size={24} color="white" />
+    <>
+      <Modal animationType="fade" visible={showZoom} onRequestClose={() => setShowZoom(false)} backdropColor="black">
+        <GestureHandlerRootView>
+          <Zoomable style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} doubleTapScale={3} isDoubleTapEnabled>
+            <Image
+              source={imageDetails?.path}
+              style={[styles.fullScreenImage, { height: imageHeight }]}
+            />
+          </Zoomable>
+        </GestureHandlerRootView>
+      </Modal>
+      <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
+        <View style={[styles.imageWrapper, { width: '100%' }]}>
+          <AutoSkeletonView
+            isLoading={!imageLoaded}
+            shimmerBackgroundColor="#333"
+            animationType='pulse'
+            shimmerSpeed={1}
+          >
+            <TouchableOpacity onPress={() => setShowZoom(true)}>
+              <Image
+                source={imageDetails?.path}
+                style={[styles.fullScreenImage, { height: imageHeight }]}
+                onLoad={() => setImageLoaded(true)}
+              />
             </TouchableOpacity>
-            <TouchableOpacity onPress={shareImage} style={styles.iconButton}>
-              <Feather name="share-2" size={24} color="white" />
-            </TouchableOpacity>
+          </AutoSkeletonView>
+          <ThemedView style={[styles.detailsContainer, { marginTop: 20 }]}>
+            <ThemedView style={styles.buttonsContainer}>
+              <TouchableOpacity onPress={downloadImage} style={styles.iconButton}>
+                <Feather name="download" size={24} color="white" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={shareImage} style={styles.iconButton}>
+                <Feather name="share-2" size={24} color="white" />
+              </TouchableOpacity>
+            </ThemedView>
+            <DetailItem label="Size" value={formatFileSize(imageDetails?.file_size)} />
+            <DetailItem label="Type" value={imageDetails?.file_type} />
+            <DetailItem label="Views" value={imageDetails?.views.toLocaleString()} />
+            <DetailItem label="Date" value={formatDate(imageDetails?.created_at)} />
+            <DetailItem label="Resolution" value={imageDetails?.resolution} />
           </ThemedView>
-          <DetailItem label="Size" value={formatFileSize(imageDetails?.file_size)} />
-          <DetailItem label="Type" value={imageDetails?.file_type} />
-          <DetailItem label="Views" value={imageDetails?.views.toLocaleString()} />
-          <DetailItem label="Date" value={formatDate(imageDetails?.created_at)} />
-          <DetailItem label="Resolution" value={imageDetails?.resolution} />
-        </ThemedView>
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </>
   );
 };
 

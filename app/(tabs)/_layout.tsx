@@ -1,4 +1,4 @@
-import { FontAwesome, MaterialIcons, AntDesign } from "@expo/vector-icons";
+import { FontAwesome, AntDesign, Feather } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { useContext } from "react";
 import Theme from "../contexts/ThemeContexts";
@@ -42,11 +42,10 @@ export default function TabLayout() {
         options={homeScreenOptions}
       />
       <Tabs.Screen
-        name="favourites"
+        name="downloads"
         options={tabScreenOptions({
-          title: 'Favourites', opts: {
-            headerShown: false,
-            tabBarIcon: ({ color }: { color: string }) => <MaterialIcons name="favorite-border" size={20} color={color} />
+          title: 'Downloads', opts: {
+            tabBarIcon: ({ color }: { color: string }) => <Feather name="download" size={20} color={color} />
           }
         })}
       />

@@ -3,7 +3,7 @@ import { TextInput, View, StyleSheet, Pressable } from 'react-native';
 import { useFilters } from '@/store/filters';
 import { useContext } from 'react';
 import Theme from '../contexts/ThemeContexts';
-import { Entypo, MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, Feather } from '@expo/vector-icons';
 
 const SearchInput = () => {
   const { setFilter, filters } = useFilters();
@@ -41,7 +41,7 @@ const SearchInput = () => {
       paddingHorizontal: 10,
       marginVertical: 5,
       borderRadius: 5,
-      borderColor: '#302f2f',
+      borderColor: '#1a1a1a',
       borderWidth: 1,
     },
     input: {
@@ -64,10 +64,12 @@ const SearchInput = () => {
       {
         filters.q ?
           <Pressable onPress={clearText}>
-            <Entypo name="cross" size={24} color={theme.text} />
+            <Feather name="x" size={24} color={theme.text} />
           </Pressable>
           :
-          <MaterialIcons name="search" size={24} color={theme.text} />
+          <Pressable onPress={() => inputRef.current?.focus()}>
+            <MaterialIcons name="search" size={24} color={theme.text} />
+          </Pressable>
       }
     </View>
   );
