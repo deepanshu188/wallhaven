@@ -43,7 +43,7 @@ const FiltersModal = ({ clearAndRefetch }: { clearAndRefetch: () => void }) => {
           <ThemedView style={styles.modalBackground}>
             <ThemedView style={styles.filterPanel}>
               <ThemedView style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <ThemedText style={styles.filterTitle}>Filter Options</ThemedText>
+                <ThemedText style={styles.filterTitle}>Filters</ThemedText>
                 <Ionicons name="close-outline" size={24} color={isDarkMode ? 'white' : 'dark'} onPress={closeFilters} />
               </ThemedView>
 
