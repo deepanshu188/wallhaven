@@ -17,6 +17,7 @@ import { AutoSkeletonView } from 'react-native-auto-skeleton';
 import Loader from '@/app/components/Loader';
 import { Zoomable } from '@likashefqet/react-native-image-zoom';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 const DetailItem = ({ label, value }: { label: string; value?: string | number }) => (
   <ThemedView style={styles.detailItem}>
@@ -30,6 +31,7 @@ const ImageDetails = () => {
   const navigation = useNavigation();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showZoom, setShowZoom] = useState(false);
+  const primaryColor = useThemeColor({}, 'primaryColor')
 
   const fetchImageDetails = async () => {
     const response = await api.get(`https://wallhaven.cc/api/v1/w/${id}`);
@@ -121,8 +123,8 @@ const ImageDetails = () => {
     const dateObj = new Date(date);
     const options: Intl.DateTimeFormatOptions = {
       year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
+      month: 'long',
+      day: 'numeric',
     };
     return dateObj.toLocaleDateString('en-US', options);
   }
@@ -147,28 +149,67 @@ const ImageDetails = () => {
             animationType='pulse'
             shimmerSpeed={1}
           >
-            <TouchableOpacity onPress={() => setShowZoom(true)}>
-              <Image
-                source={imageDetails?.path}
-                style={[styles.fullScreenImage, { height: imageHeight }]}
-                onLoad={() => setImageLoaded(true)}
-              />
-            </TouchableOpacity>
+            <Image
+              source={imageDetails?.path}
+              style={[styles.mainImage, { height: imageHeight }]}
+              contentFit="cover"
+              transition={300}
+              onLoad={() => setImageLoaded(true)}
+            />
+            {imageLoaded &&
+              <View style={styles.imageOverlay}>
+                <TouchableOpacity onPress={() => setShowZoom(true)}>
+                  <Feather name="maximize" size={24} color="white" />
+                </TouchableOpacity>
+              </View>
+            }
           </AutoSkeletonView>
-          <ThemedView style={[styles.detailsContainer, { marginTop: 20 }]}>
-            <ThemedView style={styles.buttonsContainer}>
-              <TouchableOpacity onPress={downloadImage} style={styles.iconButton}>
-                <Feather name="download" size={24} color="white" />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={shareImage} style={styles.iconButton}>
-                <Feather name="share-2" size={24} color="white" />
-              </TouchableOpacity>
+
+          <ThemedView style={styles.buttonsContainer}>
+            <TouchableOpacity onPress={downloadImage} style={styles.iconButton}>
+              <Feather name="download" size={24} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={shareImage} style={styles.iconButton}>
+              <Feather name="share-2" size={24} color="white" />
+            </TouchableOpacity>
+          </ThemedView>
+
+          <ThemedView style={styles.detailsCard}>
+            <ThemedText style={styles.detailsHeader}>Image Information</ThemedText>
+            <ThemedView style={styles.detailsGroup}>
+              {/* <ThemedView style={styles.buttonsContainer}> */}
+              {/*   <TouchableOpacity onPress={downloadImage} style={styles.iconButton}> */}
+              {/*     <Feather name="download" size={24} color="white" /> */}
+              {/*   </TouchableOpacity> */}
+              {/*   <TouchableOpacity onPress={shareImage} style={styles.iconButton}> */}
+              {/*     <Feather name="share-2" size={24} color="white" /> */}
+              {/*   </TouchableOpacity> */}
+              {/* </ThemedView> */}
+              <DetailItem label="Resolution" value={imageDetails?.resolution} />
+              <DetailItem label="Size" value={formatFileSize(imageDetails?.file_size)} />
+              <DetailItem label="Format" value={imageDetails?.file_type?.split('/')[1]?.toUpperCase()} />
             </ThemedView>
-            <DetailItem label="Size" value={formatFileSize(imageDetails?.file_size)} />
-            <DetailItem label="Type" value={imageDetails?.file_type} />
-            <DetailItem label="Views" value={imageDetails?.views.toLocaleString()} />
-            <DetailItem label="Date" value={formatDate(imageDetails?.created_at)} />
-            <DetailItem label="Resolution" value={imageDetails?.resolution} />
+
+            <ThemedView style={styles.divider} />
+
+            <ThemedView style={styles.detailsGroup}>
+              <DetailItem label="Views" value={imageDetails?.views.toLocaleString()} />
+              <DetailItem label="Uploaded" value={formatDate(imageDetails?.created_at)} />
+            </ThemedView>
+
+            {imageDetails?.tags?.length > 0 && (
+              <>
+                <ThemedView style={styles.divider} />
+                <ThemedText style={styles.tagsHeader}>Tags</ThemedText>
+                <ThemedView style={styles.tagsContainer}>
+                  {imageDetails.tags.slice(0, 6).map((tag: any, index: number) => (
+                    <ThemedView key={index} style={[styles.tagItem, { backgroundColor: primaryColor }]}>
+                      <ThemedText style={styles.tagText}>{tag.name}</ThemedText>
+                    </ThemedView>
+                  ))}
+                </ThemedView>
+              </>
+            )}
           </ThemedView>
         </View>
       </ScrollView>
@@ -187,6 +228,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  mainImage: {
+    width: '100%',
+  },
+  imageOverlay: {
+    position: 'absolute',
+    bottom: 15,
+    right: 15,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20,
+    padding: 8,
+  },
   fullScreenImage: {
     width: '100%',
   },
@@ -195,35 +247,84 @@ const styles = StyleSheet.create({
     width: '100%',
     position: 'relative',
   },
+  // action buttons
   buttonsContainer: {
     flex: 1,
     marginBottom: 20,
+    paddingRight: 10,
+    paddingTop: 10,
     justifyContent: 'flex-end',
     alignItems: 'center',
     flexDirection: 'row',
     columnGap: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   iconButton: {
-    padding: 6,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: 8,
+    backgroundColor: 'rgba( 65, 65, 65 , 0.5)',
     borderRadius: 25,
   },
-  detailsContainer: {
-    width: '96%',
-    borderRadius: 10,
-    padding: 15,
-    margin: 'auto',
+
+
+  detailsCard: {
+    marginLeft: 5,
+    marginRight: 5,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  detailsHeader: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 16,
+  },
+  detailsGroup: {
+    marginBottom: 8,
   },
   detailItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    paddingVertical: 8,
   },
   detailLabel: {
-    fontWeight: '600',
+    fontWeight: '500',
+    fontSize: 15,
+    opacity: 0.8,
   },
   detailValue: {
-    fontWeight: '400',
+    fontWeight: '600',
+    fontSize: 15,
+  },
+  divider: {
+    height: 1,
+    opacity: 0.1,
+    marginVertical: 12,
+  },
+  tagsHeader: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 8,
+  },
+  tagItem: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  tagText: {
+    fontSize: 13,
+    fontWeight: '500',
   },
 });
 
