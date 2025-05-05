@@ -1,6 +1,6 @@
-import { StyleSheet } from 'react-native';
-import { Image } from 'expo-image';
-import ThemedView from './ThemedView';
+import { StyleSheet } from "react-native";
+import { Image } from "expo-image";
+import ThemedView from "./ThemedView";
 
 const ImageItem = ({ item }) => {
   return (
@@ -8,7 +8,12 @@ const ImageItem = ({ item }) => {
       <Image
         source={item.thumbs.large}
         style={styles.image}
-        transition={1000}
+        contentFit="cover"
+        transition={300}
+        cachePolicy="memory"
+        recyclingKey={item.id}
+        placeholder={item.thumbs.small}
+        placeholderContentFit="cover"
       />
     </ThemedView>
   );
@@ -16,12 +21,12 @@ const ImageItem = ({ item }) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
+    width: "100%",
     height: 200,
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
 });
 
