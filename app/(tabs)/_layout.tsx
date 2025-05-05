@@ -12,8 +12,22 @@ export default function TabLayout() {
   const { theme } = useContext(Theme.ThemeContext);
   const tabScreenOptions = ({ title, opts }: TabScreenOptionsProps) => ({
     title,
-    headerStyle: { backgroundColor: theme.background, height: 55 },
-    headerTitleStyle: { fontSize: 16 },
+    headerStyle: {
+      backgroundColor: theme.background,
+      height: 55,
+      elevation: 4,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+    },
+    headerTitleStyle: {
+      fontSize: 18,
+      fontWeight: '600',
+      letterSpacing: 0.5,
+      paddingBottom: 2,
+    },
+    headerTitleAlign: 'center',
     headerTintColor: theme.text,
     ...opts,
   })
@@ -32,6 +46,9 @@ export default function TabLayout() {
       screenOptions={{
         tabBarStyle: {
           backgroundColor: theme.background,
+          borderTopWidth: 0,
+          elevation: 0,
+          shadowOpacity: 0,
         },
         tabBarInactiveTintColor: theme.tabIconInactive,
         tabBarActiveTintColor: theme.tabIconActive,
