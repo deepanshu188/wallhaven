@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { StyleSheet, View, Alert, Platform, TouchableOpacity, ScrollView, Dimensions, Modal } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import { useNavigation } from '@react-navigation/native';
@@ -18,6 +18,7 @@ import Loader from '@/app/components/Loader';
 import { Zoomable } from '@likashefqet/react-native-image-zoom';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { useFilters } from '@/store/filters';
 
 const DetailItem = ({ label, value }: { label: string; value?: string | number }) => (
   <ThemedView style={styles.detailItem}>
@@ -32,6 +33,9 @@ const ImageDetails = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showZoom, setShowZoom] = useState(false);
   const primaryColor = useThemeColor({}, 'primaryColor')
+  const router = useRouter();
+
+  const { setFilter } = useFilters()
 
   const fetchImageDetails = async () => {
     const response = await api.get(`https://wallhaven.cc/api/v1/w/${id}`);
@@ -157,34 +161,29 @@ const ImageDetails = () => {
               onLoad={() => setImageLoaded(true)}
             />
             {imageLoaded &&
-              <View style={styles.imageOverlay}>
-                <TouchableOpacity onPress={() => setShowZoom(true)}>
-                  <Feather name="maximize" size={24} color="white" />
-                </TouchableOpacity>
-              </View>
+              <>
+                <View style={styles.imageOverlayDownload}>
+                  <TouchableOpacity onPress={downloadImage}>
+                    <Feather name="download" size={24} color="white" />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.imageOverlayShare}>
+                  <TouchableOpacity onPress={shareImage}>
+                    <Feather name="share-2" size={24} color="white" />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.imageOverlayZoom}>
+                  <TouchableOpacity onPress={() => setShowZoom(true)}>
+                    <Feather name="maximize" size={24} color="white" />
+                  </TouchableOpacity>
+                </View>
+              </>
             }
           </AutoSkeletonView>
-
-          <ThemedView style={styles.buttonsContainer}>
-            <TouchableOpacity onPress={downloadImage} style={styles.iconButton}>
-              <Feather name="download" size={24} color="white" />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={shareImage} style={styles.iconButton}>
-              <Feather name="share-2" size={24} color="white" />
-            </TouchableOpacity>
-          </ThemedView>
 
           <ThemedView style={styles.detailsCard}>
             <ThemedText style={styles.detailsHeader}>Image Information</ThemedText>
             <ThemedView style={styles.detailsGroup}>
-              {/* <ThemedView style={styles.buttonsContainer}> */}
-              {/*   <TouchableOpacity onPress={downloadImage} style={styles.iconButton}> */}
-              {/*     <Feather name="download" size={24} color="white" /> */}
-              {/*   </TouchableOpacity> */}
-              {/*   <TouchableOpacity onPress={shareImage} style={styles.iconButton}> */}
-              {/*     <Feather name="share-2" size={24} color="white" /> */}
-              {/*   </TouchableOpacity> */}
-              {/* </ThemedView> */}
               <DetailItem label="Resolution" value={imageDetails?.resolution} />
               <DetailItem label="Size" value={formatFileSize(imageDetails?.file_size)} />
               <DetailItem label="Format" value={imageDetails?.file_type?.split('/')[1]?.toUpperCase()} />
@@ -202,9 +201,14 @@ const ImageDetails = () => {
                 <ThemedView style={styles.divider} />
                 <ThemedText style={styles.tagsHeader}>Tags</ThemedText>
                 <ThemedView style={styles.tagsContainer}>
-                  {imageDetails.tags.slice(0, 6).map((tag: any, index: number) => (
+                  {imageDetails.tags.map((tag: any, index: number) => (
                     <ThemedView key={index} style={[styles.tagItem, { backgroundColor: primaryColor }]}>
-                      <ThemedText style={styles.tagText}>{tag.name}</ThemedText>
+                      <TouchableOpacity onPress={() => {
+                        setFilter('q', tag.name)
+                        router.push('/')
+                      }}>
+                        <ThemedText style={styles.tagText}>{tag.name}</ThemedText>
+                      </TouchableOpacity>
                     </ThemedView>
                   ))}
                 </ThemedView>
@@ -231,10 +235,26 @@ const styles = StyleSheet.create({
   mainImage: {
     width: '100%',
   },
-  imageOverlay: {
+  imageOverlayZoom: {
     position: 'absolute',
     bottom: 15,
     right: 15,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20,
+    padding: 8,
+  },
+  imageOverlayDownload: {
+    position: 'absolute',
+    bottom: 15,
+    left: 15,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20,
+    padding: 8,
+  },
+  imageOverlayShare: {
+    position: 'absolute',
+    bottom: 15,
+    left: 60,
     backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 20,
     padding: 8,
@@ -246,23 +266,6 @@ const styles = StyleSheet.create({
     height: '100%',
     width: '100%',
     position: 'relative',
-  },
-  // action buttons
-  buttonsContainer: {
-    flex: 1,
-    marginBottom: 20,
-    paddingRight: 10,
-    paddingTop: 10,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    flexDirection: 'row',
-    columnGap: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  iconButton: {
-    padding: 8,
-    backgroundColor: 'rgba( 65, 65, 65 , 0.5)',
-    borderRadius: 25,
   },
 
 
