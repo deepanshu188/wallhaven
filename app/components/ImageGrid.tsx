@@ -98,7 +98,7 @@ const ImageGrid = ({ numColumns = 3 }: ImageGridProps) => {
         data={data ?? []}
         keyExtractor={(item, index) => item.id + index}
         recycleItems={true}
-        estimatedItemSize={25}
+        estimatedItemSize={24}
         renderItem={({ item }) => {
           if (!item)
             return <ThemedView style={[styles.item, styles.itemInvisible]} />;
@@ -116,9 +116,9 @@ const ImageGrid = ({ numColumns = 3 }: ImageGridProps) => {
           <RefreshControl refreshing={isLoading} onRefresh={clearAndRefetch} />
         }
         ListFooterComponent={
-          <ThemedView style={styles.footerContainer}>
+          hasNextPage ? <ThemedView style={styles.footerContainer}>
             {isFetchingNextPage && <Loader />}
-          </ThemedView>
+          </ThemedView> : null
         }
       />
       <FiltersModal clearAndRefetch={clearAndRefetch} />
