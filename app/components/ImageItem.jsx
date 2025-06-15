@@ -12,8 +12,6 @@ const ImageItem = ({ item }) => {
         transition={300}
         cachePolicy="memory"
         recyclingKey={item.id}
-        placeholder={item.thumbs.small}
-        placeholderContentFit="cover"
       />
     </ThemedView>
   );
@@ -22,7 +20,7 @@ const ImageItem = ({ item }) => {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    height: 200,
+    height: 120,
   },
   image: {
     width: "100%",

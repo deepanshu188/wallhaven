@@ -24,6 +24,3 @@ web-build/
 .metro-health-check*
 
 .env
-
-android
-ios

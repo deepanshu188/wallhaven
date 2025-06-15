@@ -1,17 +1,23 @@
-import { TouchableOpacity, StyleSheet } from 'react-native';
-import ThemedView from './ThemedView';
-import ThemedText from './ThemedText';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { TouchableOpacity, StyleSheet } from "react-native";
+import ThemedView from "./ThemedView";
+import ThemedText from "./ThemedText";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 interface RadioGroupProps {
-  options?: { label: string, value: string, disabled?: boolean }[];
+  options?: { label: string; value: string; disabled?: boolean }[];
   callBack?: (selected: string) => void;
   selectedOption?: string;
+  variant?: "outlined" | "filled";
 }
 
-const RadioGroup = ({ options = [], callBack, selectedOption }: RadioGroupProps) => {
-  const primaryColor = useThemeColor({}, 'primaryColor')
-  const secondaryColor = useThemeColor({}, 'secondaryColor')
+const RadioGroup = ({
+  options = [],
+  callBack,
+  selectedOption,
+  variant,
+}: RadioGroupProps) => {
+  const primaryColor = useThemeColor({}, "primaryColor");
+  const secondaryColor = useThemeColor({}, "secondaryColor");
   return (
     <ThemedView style={styles.container}>
       {options.map(({ label, value, disabled }) => (
@@ -21,27 +27,62 @@ const RadioGroup = ({ options = [], callBack, selectedOption }: RadioGroupProps)
           disabled={disabled}
           onPress={() => callBack?.(value)}
         >
-          <ThemedView style={[{ borderColor: disabled ? 'grey' : primaryColor }, styles.outerCircle]}>
-            {selectedOption === value && <ThemedView style={[styles.innerCircle, { backgroundColor: secondaryColor }]} />}
+          {variant !== "outlined" && (
+            <ThemedView
+              style={[
+                { borderColor: disabled ? "grey" : primaryColor },
+                styles.outerCircle,
+              ]}
+            >
+              {selectedOption === value && (
+                <ThemedView
+                  style={[
+                    styles.innerCircle,
+                    { backgroundColor: secondaryColor },
+                  ]}
+                />
+              )}
+            </ThemedView>
+          )}
+          <ThemedView
+            style={
+              variant === "outlined"
+                ? {
+                    borderColor:
+                      selectedOption === value ? primaryColor : "#ccc",
+                    borderWidth: 2,
+                    padding: 5,
+                    minWidth: 80,
+                    borderRadius: 8,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }
+                : {}
+            }
+          >
+            <ThemedText
+              style={styles.label}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {label}
+            </ThemedText>
           </ThemedView>
-          <ThemedText style={styles.label} numberOfLines={1} ellipsizeMode='tail' >{label}</ThemedText>
         </TouchableOpacity>
-      ))
-      }
-    </ThemedView >
+      ))}
+    </ThemedView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    padding: 10,
+    flexDirection: "row",
+    flexWrap: "wrap",
   },
   radioContainer: {
-    width: '33.33%',
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: "33.33%",
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 10,
   },
   outerCircle: {
@@ -49,8 +90,8 @@ const styles = StyleSheet.create({
     width: 20,
     borderRadius: 10,
     borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: 8,
   },
   innerCircle: {

@@ -18,9 +18,20 @@ import { useFocusEffect } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Zoomable } from "@likashefqet/react-native-image-zoom";
 import { MaterialIcons } from "@expo/vector-icons";
+import { LegendList, type LegendListRenderItemProps } from "@legendapp/list";
+import Loader from "../components/Loader";
+
+interface FileItem {
+  ctime: string | null;
+  mtime: string | null;
+  name: string;
+  path: string;
+  size: number;
+}
 
 const SearchScreen = () => {
   const [files, setFiles] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [selectedFile, setSelectedFile] = React.useState(null);
   const [imageHeight, setImageHeight] = React.useState(300);
   const [permissionResponse, requestPermission] = MediaLibrary.usePermissions();
@@ -36,15 +47,28 @@ const SearchScreen = () => {
       })
       .catch((err) => {
         console.log(err);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
   useFocusEffect(
     useCallback(() => {
-      if (permissionResponse?.granted) {
-        loadFiles();
-      }
-    }, [permissionResponse]),
+      const checkAndLoadFiles = async () => {
+        const res = await requestPermission();
+        if (res?.granted) {
+          loadFiles();
+        } else {
+          Alert.alert(
+            "Permission required",
+            "This app needs media library access to show your wallpapers.",
+          );
+        }
+      };
+
+      checkAndLoadFiles();
+    }, []),
   );
 
   const handleClickImage = (file: any) => {
@@ -87,6 +111,14 @@ const SearchScreen = () => {
     );
   };
 
+  if (isLoading) {
+    return (
+      <ThemedView style={[styles.center, { flex: 1 }]}>
+        <Loader />
+      </ThemedView>
+    );
+  }
+
   return (
     <>
       {
@@ -123,49 +155,53 @@ const SearchScreen = () => {
             </ThemedText>
           </ThemedView>
         ) : (
-          files?.map((file: any) => {
-            return file.isFile() ? (
-              <ThemedView key={file.name} style={styles.fileCard}>
-                <TouchableOpacity
-                  style={styles.imageContainer}
-                  onPress={() => handleClickImage(file)}
-                  activeOpacity={0.8}
-                >
-                  <Image
-                    source={`file://${file.path}`}
-                    style={styles.thumbnail}
-                    contentFit="cover"
-                    transition={200}
-                  />
-                </TouchableOpacity>
-
-                <View style={styles.fileInfo}>
-                  <ThemedText
-                    numberOfLines={1}
-                    ellipsizeMode="middle"
-                    style={styles.fileName}
+          <LegendList
+            data={files}
+            keyExtractor={(item) => item.name}
+            renderItem={({ item }: LegendListRenderItemProps<FileItem>) => {
+              return (
+                <ThemedView key={item.name} style={styles.fileCard}>
+                  <TouchableOpacity
+                    style={styles.imageContainer}
+                    onPress={() => handleClickImage(item)}
+                    activeOpacity={0.8}
                   >
-                    {file.name}
-                  </ThemedText>
-                  <ThemedText style={styles.fileSize}>
-                    {formatFileSize(file.size)}
-                  </ThemedText>
-                </View>
+                    <Image
+                      source={`file://${item.path}`}
+                      style={styles.thumbnail}
+                      contentFit="cover"
+                      transition={200}
+                    />
+                  </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={() => handleDeleteFile(file)}
-                  style={styles.deleteButton}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <MaterialIcons
-                    name="delete-outline"
-                    size={24}
-                    color="#ff3b30"
-                  />
-                </TouchableOpacity>
-              </ThemedView>
-            ) : null;
-          })
+                  <View style={styles.fileInfo}>
+                    <ThemedText
+                      numberOfLines={1}
+                      ellipsizeMode="middle"
+                      style={styles.fileName}
+                    >
+                      {item.name}
+                    </ThemedText>
+                    <ThemedText style={styles.fileSize}>
+                      {formatFileSize(item.size)}
+                    </ThemedText>
+                  </View>
+
+                  <TouchableOpacity
+                    onPress={() => handleDeleteFile(item)}
+                    style={styles.deleteButton}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <MaterialIcons
+                      name="delete-outline"
+                      size={24}
+                      color="#ff3b30"
+                    />
+                  </TouchableOpacity>
+                </ThemedView>
+              );
+            }}
+          />
         )}
       </ThemedView>
     </>
@@ -173,6 +209,10 @@ const SearchScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  center: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
   container: {
     flex: 1,
     padding: 16,

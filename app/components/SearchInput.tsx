@@ -1,14 +1,15 @@
-import React, { useRef, useState } from 'react';
-import { TextInput, View, StyleSheet, Pressable } from 'react-native';
-import { useFilters } from '@/store/filters';
-import { useContext } from 'react';
-import Theme from '../contexts/ThemeContexts';
-import { MaterialIcons, Feather } from '@expo/vector-icons';
+import React, { useCallback, useRef, useState } from "react";
+import { TextInput, View, StyleSheet, Pressable } from "react-native";
+import { useFilters } from "@/store/filters";
+import { useContext } from "react";
+import Theme from "../contexts/ThemeContexts";
+import { MaterialIcons, Feather } from "@expo/vector-icons";
+import { useFocusEffect } from "expo-router";
 
 const SearchInput = () => {
   const { setFilter, filters } = useFilters();
-  const { theme } = useContext(Theme.ThemeContext);
-  const [text, setText] = useState(filters.q || '');
+  const { theme, isDarkMode } = useContext(Theme.ThemeContext);
+  const [text, setText] = useState(filters.q);
   const debounceRef = useRef<number | null>(null);
   const inputRef = useRef<TextInput | null>(null);
 
@@ -19,35 +20,41 @@ const SearchInput = () => {
       clearTimeout(debounceRef.current);
     }
     debounceRef.current = setTimeout(() => {
-      setFilter('q', text);
+      setFilter("q", text);
       if (text.length === 0) {
         inputRef.current?.blur();
       }
     }, 500);
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      setFilter("q", text === undefined ? "" : text);
+    }, [filters.q]),
+  );
+
   const clearText = () => {
-    setText('');
-    setFilter('q', '');
+    setText("");
+    setFilter("q", "");
     inputRef.current?.blur();
   };
 
   const styles = StyleSheet.create({
     container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
       backgroundColor: theme.background,
       paddingHorizontal: 10,
       marginVertical: 5,
       borderRadius: 5,
-      borderColor: '#1a1a1a',
+      borderColor: isDarkMode ? "#414246" : "#929292",
       borderWidth: 1,
     },
     input: {
       color: theme.text,
       fontSize: 16,
-      width: '90%',
+      width: "90%",
     },
   });
 
@@ -61,16 +68,15 @@ const SearchInput = () => {
         value={text}
         ref={inputRef}
       />
-      {
-        filters.q ?
-          <Pressable onPress={clearText}>
-            <Feather name="x" size={24} color={theme.text} />
-          </Pressable>
-          :
-          <Pressable onPress={() => inputRef.current?.focus()}>
-            <MaterialIcons name="search" size={24} color={theme.text} />
-          </Pressable>
-      }
+      {filters.q ? (
+        <Pressable onPress={clearText}>
+          <Feather name="x" size={24} color={theme.text} />
+        </Pressable>
+      ) : (
+        <Pressable onPress={() => inputRef.current?.focus()}>
+          <MaterialIcons name="search" size={24} color={theme.text} />
+        </Pressable>
+      )}
     </View>
   );
 };

@@ -1,6 +1,6 @@
 import { StyleSheet, Pressable, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import ImageItem from "./ImageItem";
 import { api } from "@/axiosConfig";
 import ThemedView from "../components/ThemedView";
@@ -10,17 +10,19 @@ import FiltersModal from "./FiltersModal";
 import Loader from "./Loader";
 import ThemedText from "./ThemedText";
 import { useEffect } from "react";
+import { useQueryCache } from "@/hooks/useQueryCache";
 
 interface ImageGridProps {
   numColumns: number;
 }
 
 const ImageGrid = ({ numColumns = 3 }: ImageGridProps) => {
-  const queryClient = useQueryClient();
   const router = useRouter();
 
   const { filters } = useFilters();
   const GET_IMAGES_QUERY_KEY = ["get-images"];
+
+  const { clear } = useQueryCache(GET_IMAGES_QUERY_KEY);
 
   const fetchPage = async (page: number) => {
     try {
@@ -70,13 +72,13 @@ const ImageGrid = ({ numColumns = 3 }: ImageGridProps) => {
   const data = images?.pages?.flatMap((item) => item.data);
 
   const clearAndRefetch = () => {
-    queryClient.resetQueries({ queryKey: GET_IMAGES_QUERY_KEY, exact: true });
+    clear();
     refetch();
   };
 
   useEffect(() => {
-    clearAndRefetch()
-  }, [filters.q])
+    clearAndRefetch();
+  }, [filters.q]);
 
   if (isLoading) {
     return (
@@ -89,36 +91,39 @@ const ImageGrid = ({ numColumns = 3 }: ImageGridProps) => {
       <ThemedView style={[styles.center, { flex: 1 }]}>
         <ThemedText style={styles.noResultsText}>No results found</ThemedText>
       </ThemedView>
-    )
-  };
+    );
+  }
 
   return (
     <ThemedView style={{ flex: 1 }}>
       <LegendList
         data={data ?? []}
-        keyExtractor={(item, index) => item.id + index}
-        recycleItems={true}
-        estimatedItemSize={24}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => {
           if (!item)
             return <ThemedView style={[styles.item, styles.itemInvisible]} />;
           return (
-            <ThemedView style={styles.item}>
+            <ThemedView
+              style={[styles.item, numColumns > 1 && { borderRadius: 10 }]}
+            >
               <Pressable onPress={() => router.push(`/${item.id}`)}>
                 <ImageItem item={item} />
               </Pressable>
             </ThemedView>
           );
         }}
+        recycleItems
         numColumns={numColumns}
         onEndReached={handleLoadMore}
         refreshControl={
           <RefreshControl refreshing={isLoading} onRefresh={clearAndRefetch} />
         }
         ListFooterComponent={
-          hasNextPage ? <ThemedView style={styles.footerContainer}>
-            {isFetchingNextPage && <Loader />}
-          </ThemedView> : null
+          hasNextPage ? (
+            <ThemedView style={styles.footerContainer}>
+              {isFetchingNextPage && <Loader />}
+            </ThemedView>
+          ) : null
         }
       />
       <FiltersModal clearAndRefetch={clearAndRefetch} />
@@ -130,8 +135,6 @@ const styles = StyleSheet.create({
   item: {
     flex: 1,
     margin: 3,
-    height: 120,
-    borderRadius: 10,
     overflow: "hidden",
   },
   itemInvisible: {
@@ -142,10 +145,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   footerContainer: {
-    height: 80,
+    height: 40,
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 20,
   },
   noResultsText: {
     fontSize: 18,

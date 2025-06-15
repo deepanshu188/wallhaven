@@ -1,7 +1,7 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { useColorScheme } from 'react-native';
-import { storage } from '@/utils/mmkv';
-import { Colors } from '@/constants/Colors';
+import React, { createContext, useState, useEffect } from "react";
+import { useColorScheme } from "react-native";
+import { storage } from "@/utils/mmkv";
+import { Colors } from "@/constants/Colors";
 
 interface ThemeContextProps {
   theme: {
@@ -10,48 +10,50 @@ interface ThemeContextProps {
     tabIconInactive: string;
     tabIconActive: string;
   };
-  colorScheme: 'system' | 'light' | 'dark';
+  colorScheme: "system" | "light" | "dark";
   isDarkMode: boolean;
   toggleTheme: () => void;
-  setColorScheme: (scheme: 'system' | 'light' | 'dark') => void;
+  setColorScheme: (scheme: "system" | "light" | "dark") => void;
 }
 
 const ThemeContext = createContext<ThemeContextProps>({
   theme: {
-    background: '#fff',
-    text: '#000',
-    tabIconInactive: 'gray',
-    tabIconActive: 'tomato',
+    background: "#fff",
+    text: "#000",
+    tabIconInactive: "gray",
+    tabIconActive: "tomato",
   },
-  colorScheme: 'system',
+  colorScheme: "system",
   isDarkMode: false,
-  toggleTheme: () => { },
-  setColorScheme: () => { },
+  toggleTheme: () => {},
+  setColorScheme: () => {},
 });
 
 const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const systemScheme = useColorScheme();
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [colorScheme, setColorScheme] = useState<'system' | 'light' | 'dark'>('system');
+  const [colorScheme, setColorScheme] = useState<"system" | "light" | "dark">(
+    "system",
+  );
 
   useEffect(() => {
     const loadTheme = async () => {
       try {
-        const storedTheme = storage.getString('colorScheme');
+        const storedTheme = storage.getString("colorScheme");
         if (storedTheme !== null) {
-          if (storedTheme === 'system') {
-            setColorScheme('system');
-            setIsDarkMode(systemScheme === 'dark');
-          } else if (storedTheme === 'light') {
-            setColorScheme('light');
+          if (storedTheme === "system") {
+            setColorScheme("system");
+            setIsDarkMode(systemScheme === "dark");
+          } else if (storedTheme === "light") {
+            setColorScheme("light");
             setIsDarkMode(false);
-          } else if (storedTheme === 'dark') {
-            setColorScheme('dark');
+          } else if (storedTheme === "dark") {
+            setColorScheme("dark");
             setIsDarkMode(true);
           }
         }
       } catch (error) {
-        console.log('Error loading theme from AsyncStorage:', error);
+        console.log("Error loading theme from AsyncStorage:", error);
       }
     };
     loadTheme();
@@ -60,14 +62,14 @@ const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const saveTheme = async () => {
       try {
-        storage.set('colorScheme', colorScheme);
-        if (colorScheme === 'system') {
-          setIsDarkMode(systemScheme === 'dark');
+        storage.set("colorScheme", colorScheme);
+        if (colorScheme === "system") {
+          setIsDarkMode(systemScheme === "dark");
         } else {
-          setIsDarkMode(colorScheme === 'dark');
+          setIsDarkMode(colorScheme === "dark");
         }
       } catch (error) {
-        console.log('Error saving theme to AsyncStorage:', error);
+        console.log("Error saving theme to AsyncStorage:", error);
       }
     };
 
@@ -75,10 +77,12 @@ const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   }, [colorScheme]);
 
   const theme = {
-    background: isDarkMode ? '#000' : '#fff',
-    text: isDarkMode ? '#fff' : '#000',
-    tabIconInactive: isDarkMode ? '#fff' : '#000',
-    tabIconActive: isDarkMode ? Colors.dark.secondaryColor : Colors.light.secondaryColor,
+    background: isDarkMode ? "#111113" : "#fff",
+    text: isDarkMode ? "#fff" : "#000",
+    tabIconInactive: isDarkMode ? "#fff" : "#000",
+    tabIconActive: isDarkMode
+      ? Colors.dark.secondaryColor
+      : Colors.light.secondaryColor,
   };
 
   const toggleTheme = () => {
@@ -86,7 +90,9 @@ const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, isDarkMode, colorScheme, setColorScheme }}>
+    <ThemeContext.Provider
+      value={{ theme, toggleTheme, isDarkMode, colorScheme, setColorScheme }}
+    >
       {children}
     </ThemeContext.Provider>
   );
