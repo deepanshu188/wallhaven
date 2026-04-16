@@ -10,7 +10,7 @@ import {
   Modal,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import * as FileSystem from "expo-file-system";
+import { File, Paths } from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { useNavigation } from "@react-navigation/native";
 import { Share } from "react-native";
@@ -114,14 +114,22 @@ const ImageDetails = () => {
         );
         return;
       }
-      const fileExtension =
-        !!imageDetails?.file_type && imageDetails?.file_type.split("/")[1];
-      const fileUri = FileSystem.documentDirectory + `${id}.${fileExtension}`;
-      if (!imageDetails?.path) return;
-      const { uri } = await FileSystem.downloadAsync(
-        imageDetails?.path,
-        fileUri,
+
+      const fileExtension = imageDetails?.file_type?.split("/")[1] || 'jpg';
+      const fileUri = Paths.document.uri + id + '.' + fileExtension;
+
+      if (!imageDetails?.path) {
+        setSnackbarVisible(true);
+        setSnackbarMessage("No image path available.");
+        return;
+      }
+
+      const downloadedFile = await File.downloadFileAsync(
+        imageDetails.path,
+        new File(fileUri)
       );
+
+      const uri = downloadedFile.uri;
 
       if (Platform.OS === "android") {
         const asset = await MediaLibrary.createAssetAsync(uri);
@@ -136,9 +144,7 @@ const ImageDetails = () => {
     } catch (error) {
       console.error("Download error:", error);
       setSnackbarVisible(true);
-      setSnackbarMessage(
-        "Download failed. There was an error downloading the image.",
-      );
+      setSnackbarMessage("Download failed. There was an error downloading the image.");
     }
   };
 

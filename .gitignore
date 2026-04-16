@@ -24,3 +24,10 @@ web-build/
 .metro-health-check*
 
 .env
+
+#Android
+android/app
+android/build
+
+#Ios
+ios/build
