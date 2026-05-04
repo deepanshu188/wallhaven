@@ -8,6 +8,7 @@ import {
   Alert,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ThemedView from "../components/ThemedView";
 import ThemedText from "../components/ThemedText";
 import { Image } from "expo-image";
@@ -29,17 +30,15 @@ interface FileItem {
   size: number;
 }
 
-const SearchScreen = () => {
-  const [files, setFiles] = React.useState([]);
+const DownloadsScreen = () => {
+  const insets = useSafeAreaInsets();
+  const [files, setFiles] = React.useState<FileItem[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
-  const [selectedFile, setSelectedFile] = React.useState(null);
+  const [selectedFile, setSelectedFile] = React.useState<string | null>(null);
   const [imageHeight, setImageHeight] = React.useState(300);
   const [permissionResponse, requestPermission] = MediaLibrary.usePermissions();
 
   const loadFiles = async () => {
-    if (!permissionResponse?.granted) {
-      requestPermission();
-    }
     const path = RNFS.PicturesDirectoryPath + "/Wallhaven";
     RNFS.readDir(path)
       .then((contents) => {
@@ -68,7 +67,7 @@ const SearchScreen = () => {
       };
 
       checkAndLoadFiles();
-    }, []),
+    }, [requestPermission]),
   );
 
   const handleClickImage = (file: any) => {
@@ -119,16 +118,22 @@ const SearchScreen = () => {
     );
   }
 
+  const ListHeader = () => (
+    <View style={styles.profileHeader}>
+      <ThemedText style={styles.profileTitle}>Downloads</ThemedText>
+    </View>
+  );
+
   return (
-    <>
-      {
-        <Modal
-          animationType="fade"
-          visible={!!selectedFile}
-          onRequestClose={() => setSelectedFile(null)}
-          backdropColor="black"
-        >
-          <GestureHandlerRootView>
+    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+      <Modal
+        animationType="fade"
+        visible={!!selectedFile}
+        onRequestClose={() => setSelectedFile(null)}
+        transparent={true}
+      >
+        <View style={{ flex: 1, backgroundColor: 'black' }}>
+          <GestureHandlerRootView style={{ flex: 1 }}>
             <Zoomable
               style={{
                 flex: 1,
@@ -141,70 +146,79 @@ const SearchScreen = () => {
               <Image
                 source={`file://${selectedFile}`}
                 style={{ width: "100%", height: imageHeight }}
+                contentFit="contain"
               />
             </Zoomable>
+            <TouchableOpacity 
+              style={styles.closeZoom} 
+              onPress={() => setSelectedFile(null)}
+            >
+              <MaterialIcons name="close" size={24} color="white" />
+            </TouchableOpacity>
           </GestureHandlerRootView>
-        </Modal>
-      }
-      <ThemedView style={styles.container}>
-        {files.length === 0 ? (
+        </View>
+      </Modal>
+
+      {files.length === 0 ? (
+        <View style={{ flex: 1 }}>
+          <ListHeader />
           <ThemedView style={styles.emptyState}>
             <MaterialIcons name="photo-library" size={70} color="gray" />
             <ThemedText style={styles.emptyText}>
               No downloaded wallpapers
             </ThemedText>
           </ThemedView>
-        ) : (
-          <LegendList
-            data={files}
-            keyExtractor={(item) => item.name}
-            renderItem={({ item }: LegendListRenderItemProps<FileItem>) => {
-              return (
-                <ThemedView key={item.name} style={styles.fileCard}>
-                  <TouchableOpacity
-                    style={styles.imageContainer}
-                    onPress={() => handleClickImage(item)}
-                    activeOpacity={0.8}
-                  >
-                    <Image
-                      source={`file://${item.path}`}
-                      style={styles.thumbnail}
-                      contentFit="cover"
-                      transition={200}
-                    />
-                  </TouchableOpacity>
+        </View>
+      ) : (
+        <LegendList
+          data={files}
+          keyExtractor={(item) => item.name}
+          ListHeaderComponent={ListHeader}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          renderItem={({ item }: LegendListRenderItemProps<FileItem>) => (
+            <ThemedView key={item.name} style={styles.fileCard}>
+              <TouchableOpacity
+                style={styles.imageContainer}
+                onPress={() => handleClickImage(item)}
+                activeOpacity={0.8}
+              >
+                <Image
+                  source={`file://${item.path}`}
+                  style={styles.thumbnail}
+                  contentFit="cover"
+                  transition={200}
+                />
+              </TouchableOpacity>
 
-                  <View style={styles.fileInfo}>
-                    <ThemedText
-                      numberOfLines={1}
-                      ellipsizeMode="middle"
-                      style={styles.fileName}
-                    >
-                      {item.name}
-                    </ThemedText>
-                    <ThemedText style={styles.fileSize}>
-                      {formatFileSize(item.size)}
-                    </ThemedText>
-                  </View>
+              <View style={styles.fileInfo}>
+                <ThemedText
+                  numberOfLines={1}
+                  ellipsizeMode="middle"
+                  style={styles.fileName}
+                >
+                  {item.name}
+                </ThemedText>
+                <ThemedText style={styles.fileSize}>
+                  {formatFileSize(item.size)}
+                </ThemedText>
+              </View>
 
-                  <TouchableOpacity
-                    onPress={() => handleDeleteFile(item)}
-                    style={styles.deleteButton}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  >
-                    <MaterialIcons
-                      name="delete-outline"
-                      size={24}
-                      color="#ff3b30"
-                    />
-                  </TouchableOpacity>
-                </ThemedView>
-              );
-            }}
-          />
-        )}
-      </ThemedView>
-    </>
+              <TouchableOpacity
+                onPress={() => handleDeleteFile(item)}
+                style={styles.deleteButton}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <MaterialIcons
+                  name="delete-outline"
+                  size={24}
+                  color="#ff3b30"
+                />
+              </TouchableOpacity>
+            </ThemedView>
+          )}
+        />
+      )}
+    </ThemedView>
   );
 };
 
@@ -215,7 +229,8 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 16,
+    paddingHorizontal: 16,
+    backgroundColor: '#000',
   },
   emptyState: {
     flex: 1,
@@ -227,27 +242,33 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "gray",
   },
+  profileHeader: {
+    paddingVertical: 20,
+    marginBottom: 10,
+  },
+  profileTitle: {
+    fontSize: 32,
+    fontWeight: "800",
+    letterSpacing: -0.5,
+    color: '#fff',
+  },
   fileCard: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 16,
     padding: 12,
-    borderRadius: 16,
-    backgroundColor: "rgba(150, 150, 150, 0.07)",
-    shadowColor: "#000",
+    borderRadius: 24,
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
   },
   imageContainer: {
     borderRadius: 12,
     overflow: "hidden",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.5,
   },
   thumbnail: {
-    width: 90,
-    height: 90,
+    width: 80,
+    height: 80,
     borderRadius: 12,
   },
   fileInfo: {
@@ -258,19 +279,29 @@ const styles = StyleSheet.create({
   fileName: {
     fontSize: 16,
     fontWeight: "600",
-    marginBottom: 6,
+    marginBottom: 4,
     maxWidth: "90%",
+    color: '#fff',
   },
   fileSize: {
     fontSize: 14,
-    opacity: 0.6,
+    opacity: 0.5,
+    color: '#fff',
   },
   deleteButton: {
-    padding: 8,
+    padding: 10,
     borderRadius: 20,
     backgroundColor: "rgba(255, 59, 48, 0.1)",
     marginLeft: 8,
   },
+  closeZoom: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 12,
+    borderRadius: 100,
+  },
 });
 
-export default SearchScreen;
+export default DownloadsScreen;

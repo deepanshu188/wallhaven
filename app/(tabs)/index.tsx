@@ -9,8 +9,6 @@ const Home = () => {
     <View style={styles.headerContent}>
       <View style={styles.paddedContent}>
         <SearchInput />
-        <View style={styles.sectionHeader}>
-        </View>
       </View>
     </View>
   );

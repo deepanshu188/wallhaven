@@ -1,4 +1,5 @@
 import { Modal, StyleSheet, TouchableOpacity, View, ScrollView } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ThemedView from "./ThemedView";
 import ThemedText from "./ThemedText";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,10 +22,8 @@ const FiltersModal = ({ clearAndRefetch }: { clearAndRefetch: () => void }) => {
   const darkBg = "#111113";
   const textSecondary = "#8E8E93";
 
-  const { filters, resetFilters, setFilter } = useFilters();
-  const [showFilters, setShowFilters] = useState(false);
+  const { filters, resetFilters, setFilter, showFilters, setShowFilters } = useFilters();
 
-  const openFilters = () => { setShowFilters(true) };
   const clearFilter = () => { resetFilters() };
   const closeFilters = () => { setShowFilters(false) };
 
@@ -53,89 +52,88 @@ const FiltersModal = ({ clearAndRefetch }: { clearAndRefetch: () => void }) => {
     );
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <>
-      <ThemedView style={styles.container}>
-        <Modal
-          visible={showFilters}
-          animationType="slide"
-          transparent={true}
-          onRequestClose={closeFilters}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.filterPanel}>
-              {/* Header */}
-              <View style={styles.panelHeader}>
-                <ThemedText style={styles.panelTitle}>Filters</ThemedText>
-                <TouchableOpacity onPress={closeFilters} style={styles.closeIcon}>
-                  <Ionicons name="close" size={24} color="#fff" />
-                </TouchableOpacity>
-              </View>
+    <View style={styles.container}>
+      <Modal
+        visible={showFilters}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={closeFilters}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.filterPanel, { paddingBottom: Math.max(insets.bottom, 20) + 10 }]}>
+            {/* Header */}
+            <View style={styles.panelHeader}>
+              <ThemedText style={styles.panelTitle}>Filters</ThemedText>
+              <TouchableOpacity onPress={closeFilters} style={styles.closeIcon}>
+                <Ionicons name="close" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
 
-              {/* Tabs */}
-              <View style={styles.tabsContainer}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsScroll}>
-                  {['Sorting', 'Categories', 'Order', 'Purity'].map((tab) => (
-                    <TabButton key={tab} title={tab} />
-                  ))}
-                </ScrollView>
-              </View>
+            {/* Tabs */}
+            <View style={styles.tabsContainer}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsScroll}>
+                {['Sorting', 'Categories', 'Order', 'Purity'].map((tab) => (
+                  <TabButton key={tab} title={tab} />
+                ))}
+              </ScrollView>
+            </View>
 
-              {/* Content */}
-              <View style={styles.contentContainer}>
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  {selectedTab === 'Sorting' && (
-                    <RadioGroup
-                      options={filterOptions.sorting}
-                      callBack={(value) => setFilter('sorting', value)}
-                      selectedOption={filters?.sorting}
-                    />
-                  )}
-                  {selectedTab === 'Categories' && (
-                    <RadioGroup
-                      options={filterOptions.categories}
-                      callBack={(value) => setFilter('categories', value)}
-                      selectedOption={filters?.categories}
-                    />
-                  )}
-                  {selectedTab === 'Order' && (
-                    <RadioGroup
-                      options={filterOptions.order}
-                      callBack={(value) => setFilter('order', value)}
-                      selectedOption={filters?.order}
-                    />
-                  )}
-                  {selectedTab === 'Purity' && (
-                    <RadioGroup
-                      options={filterOptions.purity}
-                      callBack={(value) => setFilter('purity', value)}
-                      selectedOption={filters?.purity}
-                    />
-                  )}
-                </ScrollView>
-              </View>
+            {/* Content */}
+            <View style={styles.contentContainer}>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {selectedTab === 'Sorting' && (
+                  <RadioGroup
+                    options={filterOptions.sorting}
+                    callBack={(value) => setFilter('sorting', value)}
+                    selectedOption={filters?.sorting}
+                  />
+                )}
+                {selectedTab === 'Categories' && (
+                  <RadioGroup
+                    options={filterOptions.categories}
+                    callBack={(value) => setFilter('categories', value)}
+                    selectedOption={filters?.categories}
+                  />
+                )}
+                {selectedTab === 'Order' && (
+                  <RadioGroup
+                    options={filterOptions.order}
+                    callBack={(value) => setFilter('order', value)}
+                    selectedOption={filters?.order}
+                  />
+                )}
+                {selectedTab === 'Purity' && (
+                  <RadioGroup
+                    options={filterOptions.purity}
+                    callBack={(value) => setFilter('purity', value)}
+                    selectedOption={filters?.purity}
+                  />
+                )}
+              </ScrollView>
+            </View>
 
-              {/* Footer Actions */}
-              <View style={styles.footer}>
-                <TouchableOpacity 
-                  style={styles.clearButton} 
-                  onPress={clearFilter}
-                >
-                  <ThemedText style={styles.clearButtonText}>Reset All</ThemedText>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.applyButton} 
-                  onPress={handleApplyFilters}
-                >
-                  <ThemedText style={styles.applyButtonText}>Apply Filters</ThemedText>
-                </TouchableOpacity>
-              </View>
+            {/* Footer Actions */}
+            <View style={styles.footer}>
+              <TouchableOpacity 
+                style={styles.clearButton} 
+                onPress={clearFilter}
+              >
+                <ThemedText style={styles.clearButtonText}>Reset All</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.applyButton} 
+                onPress={handleApplyFilters}
+              >
+                <ThemedText style={styles.applyButtonText}>Apply Filters</ThemedText>
+              </TouchableOpacity>
             </View>
           </View>
-        </Modal>
-      </ThemedView>
-      <FAB onPress={openFilters} />
-    </>
+        </View>
+      </Modal>
+    </View>
   )
 }
 
@@ -149,7 +147,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   filterPanel: {
-    backgroundColor: '#111113',
+    backgroundColor: '#000000',
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     minHeight: 550,
@@ -228,17 +226,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#B1A2FF',
-    shadowColor: '#B1A2FF',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    backgroundColor: 'rgba(177, 162, 255, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(177, 162, 255, 0.3)',
   },
   applyButtonText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#000',
+    color: '#B1A2FF',
   },
 });
 

@@ -77,7 +77,7 @@ const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   }, [colorScheme]);
 
   const theme = {
-    background: isDarkMode ? "#111113" : "#fff",
+    background: isDarkMode ? "#000000" : "#fff",
     text: isDarkMode ? "#fff" : "#000",
     tabIconInactive: isDarkMode ? "#fff" : "#000",
     tabIconActive: isDarkMode

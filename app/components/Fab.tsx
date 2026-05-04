@@ -20,7 +20,7 @@ const FAB = ({ onPress }: { onPress: () => void }) => {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 100,
+    bottom: 24,
     right: 20,
     zIndex: 100,
   },
@@ -28,16 +28,16 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: 'rgba(25, 25, 25, 0.8)', // Slightly darker for contrast
+    backgroundColor: 'rgba(177, 162, 255, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: 'rgba(177, 162, 255, 0.3)',
-    elevation: 10,
+    elevation: 4,
     shadowColor: '#B1A2FF',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
 });
 

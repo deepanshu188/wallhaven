@@ -2,6 +2,7 @@ import { Link, useLocalSearchParams } from "expo-router";
 import ThemedText from "@/app/components/ThemedText";
 import ThemedView from "@/app/components/ThemedView";
 import { StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LegendList, LegendListRenderItemProps } from "@legendapp/list";
 import Loader from "@/app/components/Loader";
 import CollectionCard from "./CollectionCard";
@@ -26,6 +27,7 @@ const CollectionsList = ({
   self_username,
 }: CollectionsListProps) => {
   const { username } = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
 
   if (isLoading) {
     return (
@@ -41,13 +43,20 @@ const CollectionsList = ({
     );
   }
 
+  const Header = (
+    <ThemedView style={styles.profileHeader}>
+      <ThemedText style={styles.profileTitle}>Collections</ThemedText>
+    </ThemedView>
+  );
+
   return (
-    <ThemedView style={{ flex: 1, padding: 18 }}>
+    <ThemedView style={{ flex: 1, paddingHorizontal: 18, paddingTop: insets.top }}>
       <LegendList
         data={data ?? []}
         keyExtractor={(item) => item.id.toString()}
         recycleItems={true}
         numColumns={2}
+        ListHeaderComponent={Header}
         renderItem={({ item }: LegendListRenderItemProps<Collection>) => {
           return (
             <>
@@ -74,6 +83,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 20,
     fontWeight: "500",
+  },
+  profileHeader: {
+    paddingVertical: 20,
+    marginBottom: 10,
+  },
+  profileTitle: {
+    fontSize: 32,
+    fontWeight: "800",
+    letterSpacing: -0.5,
   },
 });
 

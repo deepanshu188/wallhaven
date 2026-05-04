@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   StyleSheet,
   View,
@@ -45,6 +46,7 @@ const DetailItem = ({
 );
 
 const ImageDetails = () => {
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -172,34 +174,51 @@ const ImageDetails = () => {
     router.push("/");
   };
 
+  const primaryPurple = "#B1A2FF";
+  const darkBg = "#000000";
+  const cardBg = "#111113";
+  const textSecondary = "#8E8E93";
+
   return (
     <>
       <Modal
         animationType="fade"
         visible={showZoom}
         onRequestClose={() => setShowZoom(false)}
-        backdropColor="black"
+        transparent={true}
       >
-        <GestureHandlerRootView>
-          <Zoomable
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-            doubleTapScale={3}
-            isDoubleTapEnabled
-          >
-            <Image
-              source={imageDetails?.path}
-              style={[styles.fullScreenImage, { height: imageHeight }]}
-            />
-          </Zoomable>
-        </GestureHandlerRootView>
+        <View style={{ flex: 1, backgroundColor: 'black' }}>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <Zoomable
+              style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+              doubleTapScale={3}
+              isDoubleTapEnabled
+            >
+              <Image
+                source={imageDetails?.path}
+                style={[styles.fullScreenImage, { height: imageHeight }]}
+                contentFit="contain"
+              />
+            </Zoomable>
+            <TouchableOpacity 
+              style={styles.closeZoom} 
+              onPress={() => setShowZoom(false)}
+            >
+              <Feather name="x" size={24} color="white" />
+            </TouchableOpacity>
+          </GestureHandlerRootView>
+        </View>
       </Modal>
-      <ScrollView style={{ flex: 1, backgroundColor: theme.background }}>
-        <View style={[styles.imageWrapper, { width: "100%" }]}>
+
+      <ScrollView 
+        style={{ flex: 1, backgroundColor: darkBg }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.imageWrapper}>
           <AutoSkeletonView
             isLoading={!imageLoaded}
-            shimmerBackgroundColor="#333"
+            shimmerBackgroundColor="#111"
             animationType="pulse"
-            shimmerSpeed={1}
           >
             <Image
               source={imageDetails?.path}
@@ -209,126 +228,94 @@ const ImageDetails = () => {
               onLoad={() => setImageLoaded(true)}
             />
             {imageLoaded && (
-              <>
-                <View style={styles.imageOverlayDownload}>
-                  <TouchableOpacity onPress={downloadImage}>
-                    <Feather name="download" size={24} color="white" />
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.imageOverlayShare}>
-                  <TouchableOpacity onPress={shareImage}>
-                    <Feather name="share-2" size={24} color="white" />
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.imageOverlayZoom}>
-                  <TouchableOpacity onPress={() => setShowZoom(true)}>
-                    <Feather name="maximize" size={24} color="white" />
-                  </TouchableOpacity>
-                </View>
-              </>
+              <View style={styles.actionOverlay}>
+                <TouchableOpacity 
+                  style={styles.actionCircle} 
+                  onPress={downloadImage}
+                >
+                  <Feather name="download" size={22} color="white" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.actionCircle} 
+                  onPress={shareImage}
+                >
+                  <Feather name="share-2" size={22} color="white" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.actionCircle} 
+                  onPress={() => setShowZoom(true)}
+                >
+                  <Feather name="maximize" size={22} color="white" />
+                </TouchableOpacity>
+              </View>
             )}
           </AutoSkeletonView>
+        </View>
 
-          <ThemedView style={styles.detailsCard}>
-            <ThemedText style={styles.detailsHeader}>
-              Image Information
-            </ThemedText>
-
-            <ThemedView style={styles.detailsGroup}>
-              <DetailItem
-                label={
-                  <>
-                    <TouchableOpacity
-                      onPress={() => {
-                        router.push(
-                          `/collections/${imageDetails?.uploader?.username}`,
-                        );
-                      }}
-                    >
-                      <Image
-                        source={imageDetails?.uploader?.avatar["200px"]}
-                        style={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: 20,
-                          marginRight: 8,
-                          borderColor: primaryColor,
-                          borderWidth: 1,
-                        }}
-                      />
-                    </TouchableOpacity>
-                  </>
-                }
-                value={`${imageDetails?.uploader?.username}`}
+        <View style={[styles.detailsContainer, { paddingBottom: Math.max(insets.bottom, 20) + 40 }]}>
+          {/* Uploader Card */}
+          <TouchableOpacity 
+            style={styles.card}
+            onPress={() => router.push(`/collections/${imageDetails?.uploader?.username}`)}
+          >
+            <View style={styles.uploaderRow}>
+              <Image
+                source={imageDetails?.uploader?.avatar["200px"]}
+                style={styles.avatar}
               />
-            </ThemedView>
+              <View>
+                <ThemedText style={styles.uploaderName}>
+                  {imageDetails?.uploader?.username}
+                </ThemedText>
+                <ThemedText style={styles.uploaderRole}>
+                  Uploader
+                </ThemedText>
+              </View>
+            </View>
+          </TouchableOpacity>
 
-            <ThemedView style={styles.divider} />
-
-            <ThemedView style={styles.detailsGroup}>
+          {/* Info Card */}
+          <View style={styles.card}>
+            <ThemedText style={styles.cardHeader}>Image Description</ThemedText>
+            
+            <View style={styles.infoGrid}>
               <DetailItem label="Resolution" value={imageDetails?.resolution} />
-              <DetailItem
-                label="Size"
-                value={formatFileSize(imageDetails?.file_size)}
-              />
-              <DetailItem
-                label="Format"
-                value={imageDetails?.file_type?.split("/")[1]?.toUpperCase()}
-              />
-            </ThemedView>
-
-            <ThemedView style={styles.divider} />
-
-            <ThemedView style={styles.detailsGroup}>
-              <DetailItem
-                label="Views"
-                value={imageDetails?.views.toLocaleString()}
-              />
-              <DetailItem
-                label="Uploaded"
-                value={formatDate(imageDetails?.created_at)}
-              />
-            </ThemedView>
+              <DetailItem label="Format" value={imageDetails?.file_type?.split("/")[1]?.toUpperCase()} />
+              <DetailItem label="Size" value={formatFileSize(imageDetails?.file_size)} />
+              <DetailItem label="Views" value={imageDetails?.views?.toLocaleString()} />
+              <DetailItem label="Created" value={formatDate(imageDetails?.created_at)} />
+            </View>
 
             {imageDetails?.tags?.length > 0 && (
               <>
-                <ThemedView style={styles.divider} />
-                <ThemedText style={styles.tagsHeader}>Tags</ThemedText>
-                <ThemedView style={styles.tagsContainer}>
+                <View style={styles.divider} />
+                <ThemedText style={[styles.cardHeader, { marginTop: 12 }]}>Tags</ThemedText>
+                <View style={styles.tagsContainer}>
                   {imageDetails.tags.map((tag: any, index: number) => (
-                    <ThemedView
+                    <TouchableOpacity
                       key={index}
-                      style={[
-                        styles.tagItem,
-                        { backgroundColor: primaryColor },
-                      ]}
+                      style={styles.tagPill}
+                      onPress={() => handleSearch(tag.name)}
                     >
-                      <TouchableOpacity
-                        onPress={() => {
-                          handleSearch(tag.name);
-                        }}
-                      >
-                        <ThemedText style={styles.tagText}>
-                          {tag.name}
-                        </ThemedText>
-                      </TouchableOpacity>
-                    </ThemedView>
+                      <ThemedText style={styles.tagText}>{tag.name}</ThemedText>
+                    </TouchableOpacity>
                   ))}
-                </ThemedView>
+                </View>
               </>
             )}
-            <Button
-              title="Similar Images"
-              onPress={() => handleSearch(`like:${imageDetails?.id}`)}
-              buttonStyle={{
-                backgroundColor: "transparent",
-                borderWidth: 1,
-                borderColor: "#007AFF",
-              }}
-            />
-          </ThemedView>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.similarButton}
+            onPress={() => handleSearch(`like:${imageDetails?.id}`)}
+          >
+            <ThemedText style={styles.similarButtonText}>Find Similar Wallpapers</ThemedText>
+          </TouchableOpacity>
+
+          <View style={{ height: 100 }} />
         </View>
       </ScrollView>
+
       <Snackbar
         message={snackbarMessage}
         visible={snackbarVisible}
@@ -339,111 +326,140 @@ const ImageDetails = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-  },
   loadingContainer: {
     flex: 1,
+    backgroundColor: '#000',
     justifyContent: "center",
     alignItems: "center",
+  },
+  imageWrapper: {
+    width: "100%",
+    backgroundColor: '#000',
   },
   mainImage: {
     width: "100%",
   },
-  imageOverlayZoom: {
-    position: "absolute",
-    bottom: 15,
-    right: 15,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    borderRadius: 20,
-    padding: 8,
-  },
-  imageOverlayDownload: {
-    position: "absolute",
-    bottom: 15,
-    left: 15,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    borderRadius: 20,
-    padding: 8,
-  },
-  imageOverlayShare: {
-    position: "absolute",
-    bottom: 15,
-    left: 60,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    borderRadius: 20,
-    padding: 8,
-  },
   fullScreenImage: {
     width: "100%",
   },
-  imageWrapper: {
-    height: "100%",
-    width: "100%",
-    position: "relative",
+  closeZoom: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 12,
+    borderRadius: 100,
   },
-
-  detailsCard: {
-    marginLeft: 5,
-    marginRight: 5,
-    borderRadius: 16,
+  actionOverlay: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionCircle: {
+    backgroundColor: "rgba(0,0,0,0.6)",
+    padding: 14,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  detailsContainer: {
     padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    backgroundColor: '#000',
   },
-  detailsHeader: {
-    fontSize: 18,
-    fontWeight: "700",
+  card: {
+    backgroundColor: "#000000",
+    borderRadius: 24,
+    padding: 20,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
   },
-  detailsGroup: {
-    marginBottom: 8,
+  uploaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 1.5,
+    borderColor: '#B1A2FF',
+  },
+  uploaderName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  uploaderRole: {
+    fontSize: 13,
+    color: '#8E8E93',
+  },
+  cardHeader: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: '#fff',
+    marginBottom: 16,
+    letterSpacing: 0.5,
+  },
+  infoGrid: {
+    gap: 4,
   },
   detailItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 8,
+    paddingVertical: 10,
+    borderBottomWidth: 0.5,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
   },
   detailLabel: {
-    fontWeight: "500",
-    fontSize: 15,
-    opacity: 0.8,
+    fontSize: 14,
+    color: '#8E8E93',
   },
   detailValue: {
+    fontSize: 14,
     fontWeight: "600",
-    fontSize: 15,
+    color: '#fff',
   },
   divider: {
     height: 1,
-    opacity: 0.1,
-    marginVertical: 12,
-  },
-  tagsHeader: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginTop: 4,
-    marginBottom: 12,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    marginVertical: 16,
   },
   tagsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginBottom: 8,
+    gap: 8,
   },
-  tagItem: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    marginRight: 8,
-    marginBottom: 8,
+  tagPill: {
+    backgroundColor: 'rgba(177, 162, 255, 0.15)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(177, 162, 255, 0.2)',
   },
   tagText: {
     fontSize: 13,
-    fontWeight: "500",
+    fontWeight: "600",
+    color: '#B1A2FF',
+  },
+  similarButton: {
+    height: 56,
+    backgroundColor: 'rgba(177, 162, 255, 0.15)',
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(177, 162, 255, 0.3)',
+    marginTop: 8,
+  },
+  similarButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#B1A2FF',
   },
 });
 

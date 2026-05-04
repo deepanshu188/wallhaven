@@ -19,7 +19,7 @@ export const Colors = {
   },
   dark: {
     text: "#ECEDEE",
-    background: "#111113",
+    background: "#000000",
     tint: tintColorDark,
     icon: "#9BA1A6",
     tabIconDefault: "#9BA1A6",

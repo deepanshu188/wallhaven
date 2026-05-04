@@ -5,7 +5,7 @@ import { MaterialIcons, Feather } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 
 const SearchInput = () => {
-  const { setFilter, filters } = useFilters();
+  const { setFilter, filters, setShowFilters } = useFilters();
   const [text, setText] = useState(filters.q);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<TextInput | null>(null);
@@ -45,11 +45,19 @@ const SearchInput = () => {
         value={text}
         ref={inputRef}
       />
-      {filters.q ? (
-        <Pressable onPress={clearText} style={styles.clearButton}>
-          <Feather name="x" size={18} color="#B1A2FF" />
+      <View style={styles.rightActions}>
+        {filters.q ? (
+          <Pressable onPress={clearText} style={styles.actionButton}>
+            <Feather name="x" size={18} color="#B1A2FF" />
+          </Pressable>
+        ) : null}
+        <Pressable 
+          onPress={() => setShowFilters(true)} 
+          style={[styles.actionButton, { marginLeft: 8 }]}
+        >
+          <MaterialIcons name="tune" size={20} color="#B1A2FF" />
         </Pressable>
-      ) : null}
+      </View>
     </View>
   );
 };
@@ -60,7 +68,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#1C1C1E", // Dark gray background
     paddingHorizontal: 15,
-    marginVertical: 10,
+    marginTop: 0,
+    marginBottom: 12,
     borderRadius: 25, // Pill shape
     height: 50,
   },
@@ -70,7 +79,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 10,
   },
-  clearButton: {
+  rightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionButton: {
     backgroundColor: 'rgba(177, 162, 255, 0.15)',
     padding: 6,
     borderRadius: 100,

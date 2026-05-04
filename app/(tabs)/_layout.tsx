@@ -65,10 +65,11 @@ export default function TabLayout() {
       <Tabs.Screen
         name="collections"
         options={tabScreenOptions({
-          title: "My Collections",
+          title: "Collections",
           opts: {
+            headerShown: false,
             tabBarIcon: ({ color }: { color: string }) => (
-              <MaterialIcons name="favorite-border" size={20} color={color} />
+              <FontAwesome name="folder" size={20} color={color} />
             ),
             ...(!key && { href: null }),
           },
@@ -79,8 +80,9 @@ export default function TabLayout() {
         options={tabScreenOptions({
           title: "Downloads",
           opts: {
+            headerShown: false,
             tabBarIcon: ({ color }: { color: string }) => (
-              <Feather name="download" size={20} color={color} />
+              <FontAwesome name="download" size={20} color={color} />
             ),
           },
         })}
@@ -90,6 +92,7 @@ export default function TabLayout() {
         options={tabScreenOptions({
           title: "Settings",
           opts: {
+            headerShown: false,
             tabBarIcon: ({ color }: { color: string }) => (
               <FontAwesome name="cog" size={20} color={color} />
             ),

@@ -23,9 +23,15 @@ import Theme from "../contexts/ThemeContexts";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { apiKeyStorage, storage } from "@/utils/mmkv";
 
+import appConfig from "../../app.json";
+
+import { useAuth } from "@/store/auth";
+
 const { width } = Dimensions.get("window");
+const APP_VERSION = appConfig.expo.version;
 
 const SettingsScreen = () => {
+  const { setHasApiKey } = useAuth();
   const context = useContext(Theme.ThemeContext);
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -84,6 +90,7 @@ const SettingsScreen = () => {
       setApiKey(tempApiKey);
       setUsername(tempUsername);
       setIsKeySaved(true);
+      setHasApiKey(true);
       closeModal();
     } catch (error) {
       console.log("Error saving API key:", error);
@@ -104,6 +111,7 @@ const SettingsScreen = () => {
             setApiKey(null);
             setUsername("");
             setIsKeySaved(false);
+            setHasApiKey(false);
           } catch (error) {
             console.log("Error clearing API key:", error);
           }
@@ -151,19 +159,14 @@ const SettingsScreen = () => {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerIcon}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <ThemedText style={styles.headerTitle}>Settings</ThemedText>
-        <View style={styles.headerRight} />
-      </View>
-
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.profileHeader}>
+          <ThemedText style={styles.profileTitle}>Settings</ThemedText>
+        </View>
+
         {/* ACCOUNT Section */}
         <SectionHeader title="ACCOUNT" />
         <View style={styles.card}>
@@ -241,7 +244,7 @@ const SettingsScreen = () => {
             icon={<Ionicons name="information-circle-outline" size={22} color="#fff" />}
             label="About"
             rightElement={
-              <ThemedText style={styles.versionText}>v2.4.0-pro</ThemedText>
+              <ThemedText style={styles.versionText}>v{APP_VERSION}</ThemedText>
             }
           />
         </View>
@@ -270,7 +273,7 @@ const SettingsScreen = () => {
         >
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={styles.modalContainer}
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}
           >
             <TouchableOpacity
               activeOpacity={1}
@@ -325,28 +328,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#000000",
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  headerIcon: {
-    padding: 4,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#fff",
-  },
-  headerRight: {
-    flexDirection: "row",
-    gap: 12,
-  },
   scrollContent: {
     paddingHorizontal: 16,
     paddingTop: 8,
+  },
+  profileHeader: {
+    marginBottom: 24,
+    marginTop: 12,
+  },
+  profileTitle: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#fff",
+  },
+  versionText: {
+    fontSize: 14,
+    color: "#8E8E93",
+    marginTop: 4,
   },
   sectionHeader: {
     fontSize: 12,
@@ -492,10 +490,7 @@ const styles = StyleSheet.create({
     color: "#8E8E93",
     marginTop: 2,
   },
-  versionText: {
-    fontSize: 13,
-    color: "#8E8E93",
-  },
+
   signOutButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -514,13 +509,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  modalContainer: {
-    width: "100%",
-    alignItems: "center",
-  },
   modalContent: {
     width: width * 0.85,
-    backgroundColor: "#1A1A1A",
+    backgroundColor: "#000000",
     borderRadius: 24,
     padding: 24,
     borderWidth: 1,
@@ -556,19 +547,16 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.05)",
   },
   saveButton: {
-    backgroundColor: "#B1A2FF",
+    backgroundColor: "rgba(177, 162, 255, 0.15)",
     borderRadius: 16,
     padding: 16,
     alignItems: "center",
     marginTop: 12,
-    shadowColor: "#B1A2FF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: "rgba(177, 162, 255, 0.3)",
   },
   saveButtonText: {
-    color: "#000",
+    color: "#B1A2FF",
     fontSize: 16,
     fontWeight: "700",
   },

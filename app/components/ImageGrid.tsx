@@ -153,7 +153,7 @@ const ImageGrid = ({ numColumns = 3, ListHeaderComponent }: ImageGridProps) => {
 const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 10,
-    paddingBottom: 100, // Space for the floating tab bar
+    paddingBottom: 20, // Small buffer at the bottom
     flexGrow: 1, // Ensure ListEmptyComponent can center itself
   },
   emptyContainer: {
