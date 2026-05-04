@@ -9,6 +9,8 @@ import { useContext } from "react";
 import Theme from "../contexts/ThemeContexts";
 import { apiKeyStorage } from "@/utils/mmkv";
 
+import CustomTabBar from "../components/CustomTabBar";
+
 interface TabScreenOptionsProps {
   title: string;
   opts?: any;
@@ -53,15 +55,10 @@ export default function TabLayout() {
   };
   return (
     <Tabs
+      tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
-        tabBarStyle: {
-          backgroundColor: theme.background,
-          borderTopWidth: 0,
-          elevation: 0,
-          shadowOpacity: 0,
-        },
-        tabBarInactiveTintColor: theme.tabIconInactive,
-        tabBarActiveTintColor: theme.tabIconActive,
+        headerShown: true,
+        tabBarShowLabel: false,
       }}
     >
       <Tabs.Screen name="index" options={homeScreenOptions} />

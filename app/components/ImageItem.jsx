@@ -20,7 +20,7 @@ const ImageItem = ({ item }) => {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    height: 120,
+    aspectRatio: 1,
   },
   image: {
     width: "100%",

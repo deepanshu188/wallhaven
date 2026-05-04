@@ -1,4 +1,4 @@
-import { Modal, StyleSheet, TouchableOpacity } from "react-native";
+import { Modal, StyleSheet, TouchableOpacity, View, ScrollView } from "react-native";
 import ThemedView from "./ThemedView";
 import ThemedText from "./ThemedText";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,10 +16,12 @@ const FiltersModal = ({ clearAndRefetch }: { clearAndRefetch: () => void }) => {
   const context = useContext(ThemeContext);
   const isDarkMode = context.isDarkMode;
   const [selectedTab, setSelectedTab] = useState('Sorting');
-  const primaryColor = useThemeColor({}, 'primaryColor')
+  
+  const primaryPurple = "#B1A2FF";
+  const darkBg = "#111113";
+  const textSecondary = "#8E8E93";
 
   const { filters, resetFilters, setFilter } = useFilters();
-
   const [showFilters, setShowFilters] = useState(false);
 
   const openFilters = () => { setShowFilters(true) };
@@ -30,6 +32,27 @@ const FiltersModal = ({ clearAndRefetch }: { clearAndRefetch: () => void }) => {
     closeFilters()
     clearAndRefetch();
   };
+
+  const TabButton = ({ title }: { title: string }) => {
+    const isActive = selectedTab === title;
+    return (
+      <TouchableOpacity 
+        onPress={() => setSelectedTab(title)}
+        style={[
+          styles.tabButton,
+          isActive && styles.tabButtonActive
+        ]}
+      >
+        <ThemedText style={[
+          styles.tabText,
+          isActive && styles.tabTextActive
+        ]}>
+          {title}
+        </ThemedText>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <>
       <ThemedView style={styles.container}>
@@ -37,35 +60,30 @@ const FiltersModal = ({ clearAndRefetch }: { clearAndRefetch: () => void }) => {
           visible={showFilters}
           animationType="slide"
           transparent={true}
-          hardwareAccelerated={true}
           onRequestClose={closeFilters}
         >
-          <ThemedView style={styles.modalBackground}>
-            <ThemedView style={styles.filterPanel}>
-              <ThemedView style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <ThemedText style={styles.filterTitle}>Filters</ThemedText>
-                <Ionicons name="close-outline" size={24} color={isDarkMode ? 'white' : 'dark'} onPress={closeFilters} />
-              </ThemedView>
+          <View style={styles.modalOverlay}>
+            <View style={styles.filterPanel}>
+              {/* Header */}
+              <View style={styles.panelHeader}>
+                <ThemedText style={styles.panelTitle}>Filters</ThemedText>
+                <TouchableOpacity onPress={closeFilters} style={styles.closeIcon}>
+                  <Ionicons name="close" size={24} color="#fff" />
+                </TouchableOpacity>
+              </View>
 
-
-              <ThemedView style={{ marginTop: 20 }}>
-                <ThemedView style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 10 }}>
+              {/* Tabs */}
+              <View style={styles.tabsContainer}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsScroll}>
                   {['Sorting', 'Categories', 'Order', 'Purity'].map((tab) => (
-                    <TouchableOpacity key={tab} onPress={() => setSelectedTab(tab)}>
-                      <ThemedText style={{
-                        fontWeight: selectedTab === tab ? 'bold' : 'normal',
-                        color: selectedTab === tab ? primaryColor : (isDarkMode ? '#aaa' : '#555')
-                      }}>
-                        {tab}
-                      </ThemedText>
-                    </TouchableOpacity>
+                    <TabButton key={tab} title={tab} />
                   ))}
-                </ThemedView>
-              </ThemedView>
+                </ScrollView>
+              </View>
 
-
-              <ThemedView style={{ flex: 1, justifyContent: 'space-between', marginTop: 20 }}>
-                <ThemedView>
+              {/* Content */}
+              <View style={styles.contentContainer}>
+                <ScrollView showsVerticalScrollIndicator={false}>
                   {selectedTab === 'Sorting' && (
                     <RadioGroup
                       options={filterOptions.sorting}
@@ -94,15 +112,26 @@ const FiltersModal = ({ clearAndRefetch }: { clearAndRefetch: () => void }) => {
                       selectedOption={filters?.purity}
                     />
                   )}
-                </ThemedView>
+                </ScrollView>
+              </View>
 
-                <ThemedView style={{ marginTop: 20 }}>
-                  <Button title="Apply" onPress={handleApplyFilters} buttonStyle={{ backgroundColor: primaryColor }} />
-                  <Button title="Clear" onPress={clearFilter} buttonStyle={{ marginTop: 10, backgroundColor: '#2a2e3600' }} textStyle={{ color: primaryColor }} />
-                </ThemedView>
-              </ThemedView>
-            </ThemedView>
-          </ThemedView>
+              {/* Footer Actions */}
+              <View style={styles.footer}>
+                <TouchableOpacity 
+                  style={styles.clearButton} 
+                  onPress={clearFilter}
+                >
+                  <ThemedText style={styles.clearButtonText}>Reset All</ThemedText>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.applyButton} 
+                  onPress={handleApplyFilters}
+                >
+                  <ThemedText style={styles.applyButtonText}>Apply Filters</ThemedText>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
         </Modal>
       </ThemedView>
       <FAB onPress={openFilters} />
@@ -113,29 +142,103 @@ const FiltersModal = ({ clearAndRefetch }: { clearAndRefetch: () => void }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
-  modalBackground: {
+  modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.8)',
     justifyContent: 'flex-end',
   },
   filterPanel: {
-    padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    minHeight: 500,
+    backgroundColor: '#111113',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    minHeight: 550,
+    paddingBottom: 40,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
-  filterTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
+  panelHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 24,
   },
-  closeButton: {
-    marginTop: 20,
-    color: '#6200ee',
-    fontWeight: 'bold',
+  panelTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  closeIcon: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    padding: 8,
+    borderRadius: 100,
+  },
+  tabsContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 24,
+  },
+  tabsScroll: {
+    gap: 8,
+  },
+  tabButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  tabButtonActive: {
+    backgroundColor: 'rgba(177, 162, 255, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(177, 162, 255, 0.3)',
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#8E8E93',
+  },
+  tabTextActive: {
+    color: '#B1A2FF',
+  },
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: 24,
+  },
+  footer: {
+    flexDirection: 'row',
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    gap: 12,
+  },
+  clearButton: {
+    flex: 1,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  clearButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  applyButton: {
+    flex: 2,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#B1A2FF',
+    shadowColor: '#B1A2FF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  applyButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#000',
   },
 });
 

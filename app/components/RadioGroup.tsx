@@ -16,60 +16,67 @@ const RadioGroup = ({
   selectedOption,
   variant,
 }: RadioGroupProps) => {
-  const primaryColor = useThemeColor({}, "primaryColor");
-  const secondaryColor = useThemeColor({}, "secondaryColor");
+  const primaryPurple = "#B1A2FF";
+  
   return (
     <ThemedView style={styles.container}>
-      {options.map(({ label, value, disabled }) => (
-        <TouchableOpacity
-          key={value}
-          style={styles.radioContainer}
-          disabled={disabled}
-          onPress={() => callBack?.(value)}
-        >
-          {variant !== "outlined" && (
-            <ThemedView
-              style={[
-                { borderColor: disabled ? "grey" : primaryColor },
-                styles.outerCircle,
-              ]}
-            >
-              {selectedOption === value && (
-                <ThemedView
-                  style={[
-                    styles.innerCircle,
-                    { backgroundColor: secondaryColor },
-                  ]}
-                />
-              )}
-            </ThemedView>
-          )}
-          <ThemedView
-            style={
-              variant === "outlined"
-                ? {
-                    borderColor:
-                      selectedOption === value ? primaryColor : "#ccc",
-                    borderWidth: 2,
-                    padding: 5,
-                    minWidth: 80,
-                    borderRadius: 8,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }
-                : {}
-            }
+      {options.map(({ label, value, disabled }) => {
+        const isSelected = selectedOption === value;
+        return (
+          <TouchableOpacity
+            key={value}
+            style={styles.radioContainer}
+            disabled={disabled}
+            onPress={() => callBack?.(value)}
           >
-            <ThemedText
-              style={styles.label}
-              numberOfLines={1}
-              ellipsizeMode="tail"
+            {variant !== "outlined" && (
+              <ThemedView
+                style={[
+                  styles.outerCircle,
+                  { borderColor: isSelected ? primaryPurple : "rgba(255,255,255,0.2)" }
+                ]}
+              >
+                {isSelected && (
+                  <ThemedView
+                    style={[
+                      styles.innerCircle,
+                      { backgroundColor: primaryPurple },
+                    ]}
+                  />
+                )}
+              </ThemedView>
+            )}
+            <ThemedView
+              style={
+                variant === "outlined"
+                  ? {
+                      borderColor: isSelected ? primaryPurple : "rgba(255,255,255,0.1)",
+                      borderWidth: 2,
+                      paddingHorizontal: 12,
+                      paddingVertical: 6,
+                      minWidth: 80,
+                      borderRadius: 12,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: isSelected ? "rgba(177, 162, 255, 0.1)" : "transparent",
+                    }
+                  : {}
+              }
             >
-              {label}
-            </ThemedText>
-          </ThemedView>
-        </TouchableOpacity>
-      ))}
+              <ThemedText
+                style={[
+                  styles.label,
+                  isSelected && { color: primaryPurple, fontWeight: "600" }
+                ]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {label}
+              </ThemedText>
+            </ThemedView>
+          </TouchableOpacity>
+        );
+      })}
     </ThemedView>
   );
 };

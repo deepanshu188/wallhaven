@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 
 const initialFilterState = {
+  q: '',
   sorting: '',
   order: '',
   ratio: '',
