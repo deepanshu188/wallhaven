@@ -15,7 +15,7 @@ const CollectionCard = ({ name, count }: CollectionCardProps) => {
       <ThemedView style={styles.body}>
         <ThemedText>{name}</ThemedText>
         <View style={styles.count}>
-          <AntDesign name="tago" size={16} color={"#ccc"} />
+          <AntDesign name="tags" size={16} color={"#ccc"} />
           <ThemedText>{count} items</ThemedText>
         </View>
       </ThemedView>
