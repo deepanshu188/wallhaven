@@ -140,7 +140,7 @@ const ImageGrid = ({ numColumns = 3, ListHeaderComponent }: ImageGridProps) => {
         ListFooterComponent={
           hasNextPage ? (
             <ThemedView style={styles.footerContainer}>
-              {isFetchingNextPage && <Loader />}
+              {isFetchingNextPage && <Loader size={40} />}
             </ThemedView>
           ) : null
         }
