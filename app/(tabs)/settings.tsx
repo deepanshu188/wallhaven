@@ -19,7 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
 import ThemedText from "../components/ThemedText";
-import Theme from "../contexts/ThemeContexts";
+
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { apiKeyStorage, storage } from "@/utils/mmkv";
 
@@ -32,7 +32,7 @@ const APP_VERSION = appConfig.expo.version;
 
 const SettingsScreen = () => {
   const { setHasApiKey } = useAuth();
-  const context = useContext(Theme.ThemeContext);
+
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -65,9 +65,7 @@ const SettingsScreen = () => {
     }
   }, []);
 
-  const handleThemeChange = (value: "system" | "light" | "dark") => {
-    context.setColorScheme(value);
-  };
+
 
   const openModal = () => {
     setTempUsername(username);
@@ -185,29 +183,7 @@ const SettingsScreen = () => {
           />
         </View>
 
-        {/* APPEARANCE Section */}
-        <SectionHeader title="APPEARANCE" />
-        <View style={styles.segmentedControl}>
-          {["system", "dark", "light"].map((mode) => (
-            <TouchableOpacity
-              key={mode}
-              style={[
-                styles.segmentButton,
-                context.colorScheme === mode && styles.segmentButtonActive,
-              ]}
-              onPress={() => handleThemeChange(mode as any)}
-            >
-              <ThemedText
-                style={[
-                  styles.segmentText,
-                  context.colorScheme === mode && styles.segmentTextActive,
-                ]}
-              >
-                {mode.charAt(0).toUpperCase() + mode.slice(1)}
-              </ThemedText>
-            </TouchableOpacity>
-          ))}
-        </View>
+
 
         {/* PREFERENCES Section */}
         <SectionHeader title="PREFERENCES" />
@@ -394,31 +370,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  segmentedControl: {
-    flexDirection: "row",
-    backgroundColor: "#111113",
-    borderRadius: 100,
-    padding: 4,
-    height: 48,
-  },
-  segmentButton: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 100,
-  },
-  segmentButtonActive: {
-    backgroundColor: "rgba(177, 162, 255, 0.2)",
-  },
-  segmentText: {
-    fontSize: 14,
-    color: "#8E8E93",
-    fontWeight: "500",
-  },
-  segmentTextActive: {
-    color: "#B1A2FF",
-    fontWeight: "600",
-  },
+
   cacheContainer: {
     flexDirection: "row",
     justifyContent: "space-between",

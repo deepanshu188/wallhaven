@@ -1,6 +1,4 @@
-import React, { createContext, useState, useEffect } from "react";
-import { useColorScheme } from "react-native";
-import { storage } from "@/utils/mmkv";
+import React, { createContext } from "react";
 import { Colors } from "@/constants/Colors";
 
 interface ThemeContextProps {
@@ -16,82 +14,31 @@ interface ThemeContextProps {
   setColorScheme: (scheme: "system" | "light" | "dark") => void;
 }
 
+const theme = {
+  background: "#000000",
+  text: "#fff",
+  tabIconInactive: "#fff",
+  tabIconActive: Colors.dark.secondaryColor,
+};
+
 const ThemeContext = createContext<ThemeContextProps>({
-  theme: {
-    background: "#fff",
-    text: "#000",
-    tabIconInactive: "gray",
-    tabIconActive: "tomato",
-  },
-  colorScheme: "system",
-  isDarkMode: false,
+  theme,
+  colorScheme: "dark",
+  isDarkMode: true,
   toggleTheme: () => {},
   setColorScheme: () => {},
 });
 
 const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const systemScheme = useColorScheme();
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [colorScheme, setColorScheme] = useState<"system" | "light" | "dark">(
-    "system",
-  );
-
-  useEffect(() => {
-    const loadTheme = async () => {
-      try {
-        const storedTheme = storage.getString("colorScheme");
-        if (storedTheme !== null) {
-          if (storedTheme === "system") {
-            setColorScheme("system");
-            setIsDarkMode(systemScheme === "dark");
-          } else if (storedTheme === "light") {
-            setColorScheme("light");
-            setIsDarkMode(false);
-          } else if (storedTheme === "dark") {
-            setColorScheme("dark");
-            setIsDarkMode(true);
-          }
-        }
-      } catch (error) {
-        console.log("Error loading theme from AsyncStorage:", error);
-      }
-    };
-    loadTheme();
-  }, []);
-
-  useEffect(() => {
-    const saveTheme = async () => {
-      try {
-        storage.set("colorScheme", colorScheme);
-        if (colorScheme === "system") {
-          setIsDarkMode(systemScheme === "dark");
-        } else {
-          setIsDarkMode(colorScheme === "dark");
-        }
-      } catch (error) {
-        console.log("Error saving theme to AsyncStorage:", error);
-      }
-    };
-
-    saveTheme();
-  }, [colorScheme]);
-
-  const theme = {
-    background: isDarkMode ? "#000000" : "#fff",
-    text: isDarkMode ? "#fff" : "#000",
-    tabIconInactive: isDarkMode ? "#fff" : "#000",
-    tabIconActive: isDarkMode
-      ? Colors.dark.secondaryColor
-      : Colors.light.secondaryColor,
-  };
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-  };
-
   return (
     <ThemeContext.Provider
-      value={{ theme, toggleTheme, isDarkMode, colorScheme, setColorScheme }}
+      value={{
+        theme,
+        toggleTheme: () => {},
+        isDarkMode: true,
+        colorScheme: "dark",
+        setColorScheme: () => {},
+      }}
     >
       {children}
     </ThemeContext.Provider>
