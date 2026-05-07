@@ -4,22 +4,27 @@ import { useNavigation } from "@react-navigation/native";
 import { useContext, useEffect } from "react";
 import Theme from "@/app/contexts/ThemeContexts";
 import CollectionsList from "@/app/components/CollectionsList";
-import { storage } from "@/utils/mmkv";
+import { storage, apiKeyStorage } from "@/utils/mmkv";
+import { useAuth } from "@/store/auth";
 
 const MyCollections = () => {
   const username = storage.getString("username");
+  const { hasApiKey } = useAuth();
   const { theme } = useContext(Theme.ThemeContext);
   const navigation = useNavigation();
-  const MY_COLLECTIONS_KEY = ["my-collections"];
 
   const fetchMyCollections = async () => {
-    const response = await api.get(`/collections`);
-    return response.data;
+    const key = apiKeyStorage.getString("apiKey");
+    const response = await api.get(`/collections`, {
+      params: { apikey: key },
+    });
+    return response.data?.data ?? [];
   };
 
-  const { data: userCollections, isLoading } = useQuery({
-    queryKey: MY_COLLECTIONS_KEY,
+  const { data: collections = [], isLoading } = useQuery({
+    queryKey: ["my-collections", hasApiKey],
     queryFn: fetchMyCollections,
+    enabled: hasApiKey,
   });
 
   useEffect(() => {
@@ -35,7 +40,7 @@ const MyCollections = () => {
   return (
     <CollectionsList
       isLoading={isLoading}
-      data={userCollections?.data}
+      data={collections}
       self_username={username}
     />
   );

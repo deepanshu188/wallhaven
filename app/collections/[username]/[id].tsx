@@ -1,4 +1,5 @@
 import { api } from "@/axiosConfig";
+import { apiKeyStorage } from "@/utils/mmkv";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import ThemedView from "@/app/components/ThemedView";
@@ -21,7 +22,10 @@ const UserCollections = () => {
   const USER_COLLECTION_KEY = ["collection", id];
 
   const fetchUserCollection = async () => {
-    const response = await api.get(`/collections/${username}/${id}`);
+    const key = apiKeyStorage.getString("apiKey");
+    const response = await api.get(`/collections/${username}/${id}`, {
+      params: { apikey: key },
+    });
     return response.data;
   };
 

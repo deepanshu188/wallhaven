@@ -14,18 +14,16 @@ import {
   Linking,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
 import ThemedText from "../components/ThemedText";
-
-import { useThemeColor } from "@/hooks/useThemeColor";
 import { apiKeyStorage, storage } from "@/utils/mmkv";
 
 import appConfig from "../../app.json";
 import { useAuth } from "@/store/auth";
 import { useSettings } from "@/store/settings";
+import { useQueryClient } from "@tanstack/react-query";
 
 const { width } = Dimensions.get("window");
 const APP_VERSION = appConfig.expo.version;
@@ -33,12 +31,11 @@ const APP_VERSION = appConfig.expo.version;
 const SettingsScreen = () => {
   const { setHasApiKey } = useAuth();
   const { numColumns, setNumColumns } = useSettings();
+  const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
   const primaryPurple = "#B1A2FF";
-  const darkBg = "#000000";
-  const cardBg = "#111113";
   const textSecondary = "#8E8E93";
 
   const [apiKey, setApiKey] = useState<string | null>(null);
@@ -89,6 +86,7 @@ const SettingsScreen = () => {
       setUsername(tempUsername);
       setIsKeySaved(true);
       setHasApiKey(true);
+      queryClient.invalidateQueries({ queryKey: ["my-collections"] });
       closeModal();
     } catch (error) {
       console.log("Error saving API key:", error);
