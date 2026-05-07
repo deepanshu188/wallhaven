@@ -8,7 +8,7 @@ interface AuthState {
 }
 
 export const useAuth = create<AuthState>((set) => ({
-  hasApiKey: !!apiKeyStorage.getString("wallhaven_api_key"),
+  hasApiKey: !!apiKeyStorage.getString("apiKey"),
   setHasApiKey: (value) => set({ hasApiKey: value }),
-  checkApiKey: () => set({ hasApiKey: !!apiKeyStorage.getString("wallhaven_api_key") }),
+  checkApiKey: () => set({ hasApiKey: !!apiKeyStorage.getString("apiKey") }),
 }));
