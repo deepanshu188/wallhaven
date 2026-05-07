@@ -44,7 +44,7 @@ const SettingsScreen = () => {
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
   const [isKeySaved, setIsKeySaved] = useState(false);
-  const [highQualityEnabled, setHighQualityEnabled] = useState(false);
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [tempUsername, setTempUsername] = useState("");
   const [tempApiKey, setTempApiKey] = useState("");
@@ -216,21 +216,6 @@ const SettingsScreen = () => {
                 </TouchableOpacity>
               ))}
             </View>
-          </View>
-          <View style={{ height: 1, backgroundColor: "#222", marginHorizontal: 16 }} />
-          <View style={styles.preferenceItem}>
-            <View style={styles.preferenceLeft}>
-              <ThemedText style={styles.preferenceLabel}>High-Quality Previews</ThemedText>
-              <ThemedText style={styles.preferenceSubLabel}>
-                Load high-res assets in browse mode
-              </ThemedText>
-            </View>
-            <Switch
-              value={highQualityEnabled}
-              onValueChange={setHighQualityEnabled}
-              trackColor={{ false: "#333", true: primaryPurple }}
-              thumbColor={"#fff"}
-            />
           </View>
         </View>
 
