@@ -113,6 +113,7 @@ const ImageGrid = ({ numColumns = 3, ListHeaderComponent }: ImageGridProps) => {
   return (
     <ThemedView style={{ flex: 1 }}>
       <LegendList
+        key={numColumns}
         data={data ?? []}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => {

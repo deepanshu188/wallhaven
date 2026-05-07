@@ -24,15 +24,15 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { apiKeyStorage, storage } from "@/utils/mmkv";
 
 import appConfig from "../../app.json";
-
 import { useAuth } from "@/store/auth";
+import { useSettings } from "@/store/settings";
 
 const { width } = Dimensions.get("window");
 const APP_VERSION = appConfig.expo.version;
 
 const SettingsScreen = () => {
   const { setHasApiKey } = useAuth();
-
+  const { numColumns, setNumColumns } = useSettings();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -188,6 +188,36 @@ const SettingsScreen = () => {
         {/* PREFERENCES Section */}
         <SectionHeader title="PREFERENCES" />
         <View style={styles.card}>
+          <View style={styles.preferenceItem}>
+            <View style={styles.preferenceLeft}>
+              <ThemedText style={styles.preferenceLabel}>Grid Layout</ThemedText>
+              <ThemedText style={styles.preferenceSubLabel}>
+                Choose number of columns
+              </ThemedText>
+            </View>
+            <View style={styles.layoutPicker}>
+              {[2, 3].map((cols) => (
+                <TouchableOpacity
+                  key={cols}
+                  style={[
+                    styles.layoutButton,
+                    numColumns === cols && styles.layoutButtonActive,
+                  ]}
+                  onPress={() => setNumColumns(cols)}
+                >
+                  <ThemedText
+                    style={[
+                      styles.layoutButtonText,
+                      numColumns === cols && styles.layoutButtonActiveText,
+                    ]}
+                  >
+                    {cols}
+                  </ThemedText>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+          <View style={{ height: 1, backgroundColor: "#222", marginHorizontal: 16 }} />
           <View style={styles.preferenceItem}>
             <View style={styles.preferenceLeft}>
               <ThemedText style={styles.preferenceLabel}>High-Quality Previews</ThemedText>
@@ -370,7 +400,30 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-
+  layoutPicker: {
+    flexDirection: 'row',
+    backgroundColor: '#262626',
+    borderRadius: 12,
+    padding: 4,
+  },
+  layoutButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 8,
+    minWidth: 44,
+    alignItems: 'center',
+  },
+  layoutButtonActive: {
+    backgroundColor: 'rgba(177, 162, 255, 0.2)',
+  },
+  layoutButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#8E8E93',
+  },
+  layoutButtonActiveText: {
+    color: '#B1A2FF',
+  },
   cacheContainer: {
     flexDirection: "row",
     justifyContent: "space-between",

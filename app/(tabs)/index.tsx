@@ -4,7 +4,10 @@ import ThemedView from "../components/ThemedView";
 import ImageGrid from "../components/ImageGrid";
 import SearchInput from "../components/SearchInput";
 
+import { useSettings } from "@/store/settings";
+
 const Home = () => {
+  const { numColumns } = useSettings();
   const HeaderComponent = (
     <View style={styles.headerContent}>
       <View style={styles.paddedContent}>
@@ -15,7 +18,7 @@ const Home = () => {
 
   return (
     <ThemedView style={styles.container}>
-      <ImageGrid numColumns={3} ListHeaderComponent={HeaderComponent} />
+      <ImageGrid numColumns={numColumns} ListHeaderComponent={HeaderComponent} />
     </ThemedView>
   );
 };
