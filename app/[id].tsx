@@ -19,12 +19,12 @@ import { Feather } from "@expo/vector-icons";
 import { formatFileSize } from "@/utils/formatFileSize";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import ThemedView from "../app/components/ThemedView";
+import ThemedView from "./components/ThemedView";
 import Theme from "./contexts/ThemeContexts";
 import ThemedText from "./components/ThemedText";
 import { api } from "@/axiosConfig";
 import { AutoSkeletonView } from "react-native-auto-skeleton";
-import Loader from "@/app/components/Loader";
+import Loader from "./components/Loader";
 import { Zoomable } from "@likashefqet/react-native-image-zoom";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useThemeColor } from "@/hooks/useThemeColor";
@@ -63,9 +63,10 @@ const ImageDetails = () => {
     return response.data;
   };
 
-  const { data: imageDetailsData, isLoading: loading } = useQuery({
+  const { data: imageDetailsData, isLoading: loading, isError } = useQuery({
     queryKey: ["imageDetails", id],
     queryFn: fetchImageDetails,
+    enabled: !!id,
   });
 
   const imageDetails = imageDetailsData?.data;
@@ -158,6 +159,15 @@ const ImageDetails = () => {
     );
   }
 
+  if (isError || !imageDetails) {
+    return (
+      <ThemedView style={styles.loadingContainer}>
+        <ThemedText>Error loading image details.</ThemedText>
+        <Button title="Go Back" onPress={() => router.back()} />
+      </ThemedView>
+    );
+  }
+
   const formatDate = (date: string) => {
     if (!date) return "";
     const dateObj = new Date(date);
@@ -215,41 +225,46 @@ const ImageDetails = () => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.imageWrapper}>
-          <AutoSkeletonView
-            isLoading={!imageLoaded}
-            shimmerBackgroundColor="#111"
-            animationType="pulse"
-          >
-            <Image
-              source={imageDetails?.path}
-              style={[styles.mainImage, { height: imageHeight }]}
-              contentFit="cover"
-              transition={300}
-              onLoad={() => setImageLoaded(true)}
-            />
-            {imageLoaded && (
-              <View style={styles.actionOverlay}>
-                <TouchableOpacity 
-                  style={styles.actionCircle} 
-                  onPress={downloadImage}
-                >
-                  <Feather name="download" size={22} color="white" />
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.actionCircle} 
-                  onPress={shareImage}
-                >
-                  <Feather name="share-2" size={22} color="white" />
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.actionCircle} 
-                  onPress={() => setShowZoom(true)}
-                >
-                  <Feather name="maximize" size={22} color="white" />
-                </TouchableOpacity>
-              </View>
-            )}
-          </AutoSkeletonView>
+          <Image
+            source={{ uri: imageDetails?.path }}
+            style={[styles.mainImage, { height: imageHeight }]}
+            contentFit="cover"
+            transition={300}
+            onLoad={() => setImageLoaded(true)}
+          />
+          {!imageLoaded && (
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: '#111' }]}>
+              <AutoSkeletonView
+                isLoading={true}
+                shimmerBackgroundColor="#222"
+                animationType="pulse"
+              >
+                <View style={{ width: "100%", height: imageHeight }} />
+              </AutoSkeletonView>
+            </View>
+          )}
+          {imageLoaded && (
+            <View style={styles.actionOverlay}>
+              <TouchableOpacity 
+                style={styles.actionCircle} 
+                onPress={downloadImage}
+              >
+                <Feather name="download" size={22} color="white" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.actionCircle} 
+                onPress={shareImage}
+              >
+                <Feather name="share-2" size={22} color="white" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.actionCircle} 
+                onPress={() => setShowZoom(true)}
+              >
+                <Feather name="maximize" size={22} color="white" />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         <View style={[styles.detailsContainer, { paddingBottom: Math.max(insets.bottom, 20) + 40 }]}>
