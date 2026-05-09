@@ -4,7 +4,6 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
-  Switch,
   Alert,
   Modal,
   TextInput,
@@ -15,12 +14,11 @@ import {
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 
 import ThemedText from "../components/ThemedText";
 import { apiKeyStorage, storage } from "@/utils/mmkv";
 
-import appConfig from "../../app.json";
+import appConfig from "@/app.json";
 import { useAuth } from "@/store/auth";
 import { useSettings } from "@/store/settings";
 import { useQueryClient } from "@tanstack/react-query";
@@ -33,7 +31,6 @@ const SettingsScreen = () => {
   const { numColumns, setNumColumns } = useSettings();
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
-  const router = useRouter();
 
   const primaryPurple = "#B1A2FF";
   const textSecondary = "#8E8E93";
