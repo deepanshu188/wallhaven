@@ -2,7 +2,6 @@ import React, { useCallback, useRef, useState } from "react";
 import { TextInput, View, StyleSheet, Pressable } from "react-native";
 import { useFilters } from "@/store/filters";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
-import { useFocusEffect } from "expo-router";
 
 const SearchInput = () => {
   const { setFilter, filters, setShowFilters } = useFilters();
@@ -66,11 +65,11 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#1C1C1E", // Dark gray background
+    backgroundColor: "#1C1C1E",
     paddingHorizontal: 15,
     marginTop: 0,
     marginBottom: 12,
-    borderRadius: 25, // Pill shape
+    borderRadius: 15,
     height: 50,
   },
   input: {

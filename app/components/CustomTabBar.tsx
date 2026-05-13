@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   wrapper: {
     width: width * 0.95,
     alignSelf: 'center',
-    borderRadius: 100,
+    borderRadius: 20,
     overflow: 'hidden',
     ...Platform.select({
       ios: {
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     }),
   },
   container: {
-    height: 70,
+    height: 60,
     justifyContent: 'center',
     paddingHorizontal: 10,
     backgroundColor: 'rgba(25, 25, 25, 0.95)',

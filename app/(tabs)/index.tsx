@@ -10,9 +10,7 @@ const Home = () => {
   const { numColumns } = useSettings();
   const HeaderComponent = (
     <View style={styles.headerContent}>
-      <View style={styles.paddedContent}>
         <SearchInput />
-      </View>
     </View>
   );
 
@@ -29,9 +27,6 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     backgroundColor: 'transparent',
-  },
-  paddedContent: {
-    paddingHorizontal: 15,
   },
   sectionHeader: {
     flexDirection: 'row',
